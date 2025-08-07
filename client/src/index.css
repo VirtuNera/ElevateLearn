@@ -3,46 +3,47 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(0, 0%, 100%);
-  --foreground: hsl(0, 0%, 13%);
-  --card: hsl(0, 0%, 98%);
-  --card-foreground: hsl(0, 0%, 13%);
-  --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(0, 0%, 13%);
-  --primary: hsl(207, 90%, 42%);
-  --primary-foreground: hsl(0, 0%, 100%);
-  --primary-dark: hsl(212, 92%, 37%);
-  --secondary: hsl(122, 39%, 40%);
-  --secondary-foreground: hsl(0, 0%, 100%);
-  --academic: hsl(291, 64%, 42%);
-  --academic-foreground: hsl(0, 0%, 100%);
-  --corporate: hsl(31, 100%, 49%);
-  --corporate-foreground: hsl(0, 0%, 100%);
-  --surface: hsl(0, 0%, 98%);
-  --on-surface: hsl(0, 0%, 13%);
-  --on-surface-variant: hsl(0, 0%, 46%);
-  --muted: hsl(240, 2%, 90%);
-  --muted-foreground: hsl(0, 0%, 46%);
-  --accent: hsl(210, 40%, 93%);
-  --accent-foreground: hsl(207, 90%, 42%);
+  /* Based on Color Palette: #0D1321, #1D2D44, #3E5C76, #748CAB, #F0EBD8 */
+  --background: hsl(42, 15%, 94%); /* F0EBD8 - Light cream */
+  --foreground: hsl(210, 35%, 8%); /* 0D1321 - Deep navy */
+  --card: hsl(42, 15%, 96%);
+  --card-foreground: hsl(210, 35%, 8%);
+  --popover: hsl(42, 15%, 94%);
+  --popover-foreground: hsl(210, 35%, 8%);
+  --primary: hsl(207, 47%, 34%); /* 3E5C76 - Medium slate blue */
+  --primary-foreground: hsl(42, 15%, 94%);
+  --primary-dark: hsl(211, 50%, 19%); /* 1D2D44 - Dark slate */
+  --secondary: hsl(210, 26%, 56%); /* 748CAB - Light slate blue */
+  --secondary-foreground: hsl(210, 35%, 8%);
+  --academic: hsl(207, 47%, 34%); /* Keep primary blue for academic */
+  --academic-foreground: hsl(42, 15%, 94%);
+  --corporate: hsl(210, 26%, 56%); /* Use lighter blue for corporate */
+  --corporate-foreground: hsl(210, 35%, 8%);
+  --surface: hsl(42, 15%, 96%);
+  --on-surface: hsl(210, 35%, 8%);
+  --on-surface-variant: hsl(207, 25%, 45%);
+  --muted: hsl(42, 15%, 91%);
+  --muted-foreground: hsl(207, 25%, 45%);
+  --accent: hsl(210, 26%, 56%);
+  --accent-foreground: hsl(210, 35%, 8%);
   --destructive: hsl(0, 84%, 60%);
-  --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(214, 32%, 91%);
-  --input: hsl(214, 32%, 91%);
-  --ring: hsl(207, 90%, 42%);
-  --chart-1: hsl(207, 90%, 42%);
-  --chart-2: hsl(122, 39%, 40%);
-  --chart-3: hsl(31, 100%, 49%);
-  --chart-4: hsl(291, 64%, 42%);
-  --chart-5: hsl(340, 75%, 51%);
-  --sidebar: hsl(0, 0%, 98%);
-  --sidebar-foreground: hsl(0, 0%, 13%);
-  --sidebar-primary: hsl(207, 90%, 42%);
-  --sidebar-primary-foreground: hsl(0, 0%, 100%);
-  --sidebar-accent: hsl(210, 40%, 93%);
-  --sidebar-accent-foreground: hsl(207, 90%, 42%);
-  --sidebar-border: hsl(214, 32%, 91%);
-  --sidebar-ring: hsl(207, 90%, 42%);
+  --destructive-foreground: hsl(42, 15%, 94%);
+  --border: hsl(42, 15%, 88%);
+  --input: hsl(42, 15%, 91%);
+  --ring: hsl(207, 47%, 34%);
+  --chart-1: hsl(207, 47%, 34%); /* 3E5C76 */
+  --chart-2: hsl(210, 26%, 56%); /* 748CAB */
+  --chart-3: hsl(211, 50%, 19%); /* 1D2D44 */
+  --chart-4: hsl(210, 35%, 8%); /* 0D1321 */
+  --chart-5: hsl(42, 15%, 80%); /* F0EBD8 variant */
+  --sidebar: hsl(42, 15%, 96%);
+  --sidebar-foreground: hsl(210, 35%, 8%);
+  --sidebar-primary: hsl(207, 47%, 34%);
+  --sidebar-primary-foreground: hsl(42, 15%, 94%);
+  --sidebar-accent: hsl(210, 26%, 56%);
+  --sidebar-accent-foreground: hsl(210, 35%, 8%);
+  --sidebar-border: hsl(42, 15%, 88%);
+  --sidebar-ring: hsl(207, 47%, 34%);
   --font-sans: Inter, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
@@ -60,46 +61,46 @@
 }
 
 .dark {
-  --background: hsl(0, 0%, 0%);
-  --foreground: hsl(0, 0%, 91%);
-  --card: hsl(0, 0%, 8%);
-  --card-foreground: hsl(0, 0%, 85%);
-  --popover: hsl(0, 0%, 0%);
-  --popover-foreground: hsl(0, 0%, 91%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(0, 0%, 100%);
-  --primary-dark: hsl(212, 92%, 45%);
-  --secondary: hsl(122, 39%, 49%);
-  --secondary-foreground: hsl(0, 0%, 100%);
-  --academic: hsl(291, 64%, 55%);
-  --academic-foreground: hsl(0, 0%, 100%);
-  --corporate: hsl(31, 100%, 60%);
-  --corporate-foreground: hsl(0, 0%, 100%);
-  --surface: hsl(0, 0%, 8%);
-  --on-surface: hsl(0, 0%, 91%);
-  --on-surface-variant: hsl(0, 0%, 60%);
-  --muted: hsl(0, 0%, 15%);
-  --muted-foreground: hsl(0, 0%, 46%);
-  --accent: hsl(0, 0%, 15%);
-  --accent-foreground: hsl(207, 90%, 54%);
+  --background: hsl(210, 35%, 8%); /* 0D1321 - Deep navy */
+  --foreground: hsl(42, 15%, 94%); /* F0EBD8 - Light cream */
+  --card: hsl(211, 50%, 19%); /* 1D2D44 - Dark slate */
+  --card-foreground: hsl(42, 15%, 94%);
+  --popover: hsl(211, 50%, 19%);
+  --popover-foreground: hsl(42, 15%, 94%);
+  --primary: hsl(207, 47%, 34%); /* 3E5C76 - Medium slate blue */
+  --primary-foreground: hsl(42, 15%, 94%);
+  --primary-dark: hsl(210, 35%, 8%);
+  --secondary: hsl(211, 50%, 19%);
+  --secondary-foreground: hsl(42, 15%, 94%);
+  --academic: hsl(207, 47%, 34%);
+  --academic-foreground: hsl(42, 15%, 94%);
+  --corporate: hsl(210, 26%, 56%);
+  --corporate-foreground: hsl(210, 35%, 8%);
+  --surface: hsl(211, 50%, 19%);
+  --on-surface: hsl(42, 15%, 94%);
+  --on-surface-variant: hsl(210, 26%, 56%);
+  --muted: hsl(211, 40%, 15%);
+  --muted-foreground: hsl(210, 26%, 56%);
+  --accent: hsl(207, 47%, 34%);
+  --accent-foreground: hsl(42, 15%, 94%);
   --destructive: hsl(0, 62%, 30%);
-  --destructive-foreground: hsl(0, 85%, 97%);
-  --border: hsl(0, 0%, 15%);
-  --input: hsl(0, 0%, 15%);
-  --ring: hsl(207, 90%, 54%);
-  --chart-1: hsl(207, 90%, 54%);
-  --chart-2: hsl(122, 39%, 49%);
-  --chart-3: hsl(31, 100%, 60%);
-  --chart-4: hsl(291, 64%, 55%);
-  --chart-5: hsl(340, 75%, 55%);
-  --sidebar: hsl(0, 0%, 8%);
-  --sidebar-foreground: hsl(0, 0%, 85%);
-  --sidebar-primary: hsl(207, 90%, 54%);
-  --sidebar-primary-foreground: hsl(0, 0%, 100%);
-  --sidebar-accent: hsl(0, 0%, 15%);
-  --sidebar-accent-foreground: hsl(207, 90%, 54%);
-  --sidebar-border: hsl(0, 0%, 20%);
-  --sidebar-ring: hsl(207, 90%, 54%);
+  --destructive-foreground: hsl(42, 15%, 94%);
+  --border: hsl(211, 40%, 25%);
+  --input: hsl(211, 40%, 25%);
+  --ring: hsl(207, 47%, 34%);
+  --chart-1: hsl(207, 47%, 34%);
+  --chart-2: hsl(210, 26%, 56%);
+  --chart-3: hsl(42, 15%, 85%);
+  --chart-4: hsl(42, 15%, 70%);
+  --chart-5: hsl(210, 35%, 20%);
+  --sidebar: hsl(211, 50%, 19%);
+  --sidebar-foreground: hsl(42, 15%, 94%);
+  --sidebar-primary: hsl(207, 47%, 34%);
+  --sidebar-primary-foreground: hsl(42, 15%, 94%);
+  --sidebar-accent: hsl(207, 47%, 34%);
+  --sidebar-accent-foreground: hsl(42, 15%, 94%);
+  --sidebar-border: hsl(211, 40%, 25%);
+  --sidebar-ring: hsl(207, 47%, 34%);
   --font-sans: Inter, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
@@ -170,6 +171,11 @@
   /* Gradient backgrounds for hero sections */
   .bg-gradient-to-br {
     background-image: linear-gradient(to bottom right, var(--primary), var(--primary-dark));
+  }
+  
+  /* New gradient using the palette colors */
+  .bg-gradient-palette {
+    background-image: linear-gradient(135deg, hsl(207, 47%, 34%) 0%, hsl(211, 50%, 19%) 50%, hsl(210, 35%, 8%) 100%);
   }
 
   /* Custom backdrop blur for modals and navigation */

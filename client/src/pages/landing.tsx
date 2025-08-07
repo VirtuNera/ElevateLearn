@@ -15,7 +15,7 @@ export default function Landing() {
   const [showDemoLogin, setShowDemoLogin] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary to-primary-dark">
+    <div className="min-h-screen bg-gradient-palette">
       {/* Navigation */}
       <nav className="bg-white/10 backdrop-blur-md border-b border-white/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
