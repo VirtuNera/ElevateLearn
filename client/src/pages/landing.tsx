@@ -6,14 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { GraduationCap, University, Briefcase, Check, X } from "lucide-react";
+import { DemoLogin } from "@/components/demo-login";
 
 export default function Landing() {
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
 
-  const handleAuth = () => {
-    window.location.href = "/api/login";
-  };
+  const [showDemoLogin, setShowDemoLogin] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary to-primary-dark">
@@ -34,9 +33,9 @@ export default function Landing() {
               <Button
                 variant="ghost"
                 className="bg-white/20 hover:bg-white/30 text-white border-0"
-                onClick={() => setShowLogin(true)}
+                onClick={() => setShowDemoLogin(true)}
               >
-                Log In
+                Demo Login
               </Button>
               <Button
                 className="bg-white text-primary hover:bg-gray-100 font-medium"
@@ -125,7 +124,7 @@ export default function Landing() {
           <DialogHeader>
             <DialogTitle className="text-2xl font-semibold">Welcome Back</DialogTitle>
           </DialogHeader>
-          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleAuth(); }}>
+          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); setShowDemoLogin(true); setShowLogin(false); }}>
             <div>
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" placeholder="Enter your email" />
@@ -135,7 +134,7 @@ export default function Landing() {
               <Input id="password" type="password" placeholder="Enter your password" />
             </div>
             <Button type="submit" className="w-full">
-              Sign In
+              Try Demo Instead
             </Button>
           </form>
           <p className="text-center text-muted-foreground">
@@ -156,7 +155,7 @@ export default function Landing() {
           <DialogHeader>
             <DialogTitle className="text-2xl font-semibold">Create Account</DialogTitle>
           </DialogHeader>
-          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleAuth(); }}>
+          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); setShowDemoLogin(true); setShowSignup(false); }}>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="firstName">First Name</Label>
@@ -202,7 +201,7 @@ export default function Landing() {
               <Input id="password" type="password" placeholder="Create a strong password" />
             </div>
             <Button type="submit" className="w-full">
-              Create Account
+              Try Demo Instead
             </Button>
           </form>
           <p className="text-center text-muted-foreground">
@@ -216,6 +215,12 @@ export default function Landing() {
           </p>
         </DialogContent>
       </Dialog>
+
+      {/* Demo Login Modal */}
+      <DemoLogin 
+        isOpen={showDemoLogin} 
+        onClose={() => setShowDemoLogin(false)} 
+      />
     </div>
   );
 }
