@@ -1,0 +1,58 @@
+You are to help me build a modular, role-based Learning Management System (LMS) using Replit. The LMS must serve both Higher Education and Corporate Training needs. It should include the following:
+
+## 🔐 Authentication & User Roles
+- User registration and login system (with password hashing)
+- Role-based access for:
+  - Learner
+  - Mentor (Instructor/Trainer)
+  - Admin
+- Support for assigning roles upon registration or via Admin panel
+- Basic session management (JWT or session-based)
+
+## 🧑‍🎓 Learner Features
+- Learner Dashboard with 3 tabs:
+  - Learning Hub: Browse/search courses (filter: Corporate or Academic)
+  - Active Courses
+  - Completed Courses
+- Credential Wallet: Stores earned certifications
+- Notification Center (assignment deadlines, feedback, course completion)
+
+## 🧑‍🏫 Mentor Features
+- Mentor Dashboard
+  - Manage Learners: Accept, Group, Track Progress
+  - Create/Manage Courses
+    - Academic-style: Assignments, Grades, Rubrics
+    - Corporate-style: Microlearning, Simulations, Auto-Certifications
+  - Quick Actions (Grade, Comment, Send Message)
+
+## 🧑‍💼 Admin Features
+- Admin Dashboard
+  - Role Assignment Panel
+  - Learner Group Management
+  - Content Approval
+  - Organization/Institution Profile Management
+  - Data Analytics Panel (course engagement, completion stats, user activity)
+
+## 📚 Course Architecture
+- Dual Course Model:
+  - Academic:
+    - Structured modules
+    - Assignment Submission + Feedback + Gradebook
+  - Corporate:
+    - Self-paced content
+    - Scenario-based quizzes
+    - Certification trigger on completion
+
+## 🌐 Tech Stack
+- Frontend: HTML, CSS (Tailwind), JavaScript (React or plain)
+- Backend: Node.js + Express
+- Database: PostgreSQL or SQLite (for Replit compatibility)
+- Hosting: Replit (with Replit DB or external Postgres) or Netlify
+
+## ✅ Bonus Features
+- In-app messaging between roles
+- Tagging system for course types and certifications
+- Role-based dashboard rendering (via middleware or client check)
+- Mobile-friendly layout
+
+Let’s start by scaffolding the basic file structure and setting up authentication and role routing first.
