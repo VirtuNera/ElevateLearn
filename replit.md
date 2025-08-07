@@ -2,6 +2,13 @@
 
 Elevate 360 LMS is a comprehensive Learning Management System designed to serve both higher education and corporate training environments. The system features a dual-purpose architecture that supports academic-style learning (assignments, grades, rubrics) and corporate-style training (microlearning, simulations, auto-certifications). Built with a role-based access control system, it provides tailored experiences for learners, mentors/instructors, and administrators across different organizational contexts.
 
+## Recent Changes (January 2025)
+
+- **Authentication System Updated**: Replaced Replit Auth with demo authentication system to remove external account connection requirements
+- **Demo Users Implemented**: Created three test users (Sarah/Learner, John/Mentor, Alex/Admin) for easy role-based testing
+- **Simplified Login Flow**: Users can now access the LMS immediately through the demo login modal without external service dependencies
+- **Full Role-Based Dashboards**: All three user roles have functional dashboards with appropriate features and permissions
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
