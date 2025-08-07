@@ -1,0 +1,334 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(0, 0%, 13%);
+  --card: hsl(0, 0%, 98%);
+  --card-foreground: hsl(0, 0%, 13%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(0, 0%, 13%);
+  --primary: hsl(207, 90%, 42%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --primary-dark: hsl(212, 92%, 37%);
+  --secondary: hsl(122, 39%, 40%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --academic: hsl(291, 64%, 42%);
+  --academic-foreground: hsl(0, 0%, 100%);
+  --corporate: hsl(31, 100%, 49%);
+  --corporate-foreground: hsl(0, 0%, 100%);
+  --surface: hsl(0, 0%, 98%);
+  --on-surface: hsl(0, 0%, 13%);
+  --on-surface-variant: hsl(0, 0%, 46%);
+  --muted: hsl(240, 2%, 90%);
+  --muted-foreground: hsl(0, 0%, 46%);
+  --accent: hsl(210, 40%, 93%);
+  --accent-foreground: hsl(207, 90%, 42%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(214, 32%, 91%);
+  --input: hsl(214, 32%, 91%);
+  --ring: hsl(207, 90%, 42%);
+  --chart-1: hsl(207, 90%, 42%);
+  --chart-2: hsl(122, 39%, 40%);
+  --chart-3: hsl(31, 100%, 49%);
+  --chart-4: hsl(291, 64%, 42%);
+  --chart-5: hsl(340, 75%, 51%);
+  --sidebar: hsl(0, 0%, 98%);
+  --sidebar-foreground: hsl(0, 0%, 13%);
+  --sidebar-primary: hsl(207, 90%, 42%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(210, 40%, 93%);
+  --sidebar-accent-foreground: hsl(207, 90%, 42%);
+  --sidebar-border: hsl(214, 32%, 91%);
+  --sidebar-ring: hsl(207, 90%, 42%);
+  --font-sans: Inter, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 0.5rem;
+  --shadow-2xs: 0px 1px 2px 0px hsl(0, 0%, 0%, 0.05);
+  --shadow-xs: 0px 1px 2px 0px hsl(0, 0%, 0%, 0.05);
+  --shadow-sm: 0px 1px 2px 0px hsl(0, 0%, 0%, 0.05), 0px 1px 3px 0px hsl(0, 0%, 0%, 0.1);
+  --shadow: 0px 1px 3px 0px hsl(0, 0%, 0%, 0.1), 0px 1px 2px 0px hsl(0, 0%, 0%, 0.06);
+  --shadow-md: 0px 4px 6px -1px hsl(0, 0%, 0%, 0.1), 0px 2px 4px -1px hsl(0, 0%, 0%, 0.06);
+  --shadow-lg: 0px 10px 15px -3px hsl(0, 0%, 0%, 0.1), 0px 4px 6px -2px hsl(0, 0%, 0%, 0.05);
+  --shadow-xl: 0px 20px 25px -5px hsl(0, 0%, 0%, 0.1), 0px 10px 10px -5px hsl(0, 0%, 0%, 0.04);
+  --shadow-2xl: 0px 25px 50px -12px hsl(0, 0%, 0%, 0.25);
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+}
+
+.dark {
+  --background: hsl(0, 0%, 0%);
+  --foreground: hsl(0, 0%, 91%);
+  --card: hsl(0, 0%, 8%);
+  --card-foreground: hsl(0, 0%, 85%);
+  --popover: hsl(0, 0%, 0%);
+  --popover-foreground: hsl(0, 0%, 91%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --primary-dark: hsl(212, 92%, 45%);
+  --secondary: hsl(122, 39%, 49%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --academic: hsl(291, 64%, 55%);
+  --academic-foreground: hsl(0, 0%, 100%);
+  --corporate: hsl(31, 100%, 60%);
+  --corporate-foreground: hsl(0, 0%, 100%);
+  --surface: hsl(0, 0%, 8%);
+  --on-surface: hsl(0, 0%, 91%);
+  --on-surface-variant: hsl(0, 0%, 60%);
+  --muted: hsl(0, 0%, 15%);
+  --muted-foreground: hsl(0, 0%, 46%);
+  --accent: hsl(0, 0%, 15%);
+  --accent-foreground: hsl(207, 90%, 54%);
+  --destructive: hsl(0, 62%, 30%);
+  --destructive-foreground: hsl(0, 85%, 97%);
+  --border: hsl(0, 0%, 15%);
+  --input: hsl(0, 0%, 15%);
+  --ring: hsl(207, 90%, 54%);
+  --chart-1: hsl(207, 90%, 54%);
+  --chart-2: hsl(122, 39%, 49%);
+  --chart-3: hsl(31, 100%, 60%);
+  --chart-4: hsl(291, 64%, 55%);
+  --chart-5: hsl(340, 75%, 55%);
+  --sidebar: hsl(0, 0%, 8%);
+  --sidebar-foreground: hsl(0, 0%, 85%);
+  --sidebar-primary: hsl(207, 90%, 54%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(0, 0%, 15%);
+  --sidebar-accent-foreground: hsl(207, 90%, 54%);
+  --sidebar-border: hsl(0, 0%, 20%);
+  --sidebar-ring: hsl(207, 90%, 54%);
+  --font-sans: Inter, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 0.5rem;
+  --shadow-2xs: 0px 1px 2px 0px hsl(0, 0%, 0%, 0.25);
+  --shadow-xs: 0px 1px 2px 0px hsl(0, 0%, 0%, 0.25);
+  --shadow-sm: 0px 1px 2px 0px hsl(0, 0%, 0%, 0.25), 0px 1px 3px 0px hsl(0, 0%, 0%, 0.35);
+  --shadow: 0px 1px 3px 0px hsl(0, 0%, 0%, 0.35), 0px 1px 2px 0px hsl(0, 0%, 0%, 0.20);
+  --shadow-md: 0px 4px 6px -1px hsl(0, 0%, 0%, 0.35), 0px 2px 4px -1px hsl(0, 0%, 0%, 0.20);
+  --shadow-lg: 0px 10px 15px -3px hsl(0, 0%, 0%, 0.35), 0px 4px 6px -2px hsl(0, 0%, 0%, 0.15);
+  --shadow-xl: 0px 20px 25px -5px hsl(0, 0%, 0%, 0.35), 0px 10px 10px -5px hsl(0, 0%, 0%, 0.10);
+  --shadow-2xl: 0px 25px 50px -12px hsl(0, 0%, 0%, 0.50);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Custom component styles that match the design reference */
+  .bg-primary-dark {
+    background-color: var(--primary-dark);
+  }
+
+  .text-primary-dark {
+    color: var(--primary-dark);
+  }
+
+  .bg-academic {
+    background-color: var(--academic);
+  }
+
+  .text-academic {
+    color: var(--academic);
+  }
+
+  .bg-corporate {
+    background-color: var(--corporate);
+  }
+
+  .text-corporate {
+    color: var(--corporate);
+  }
+
+  .bg-surface {
+    background-color: var(--surface);
+  }
+
+  .text-on-surface {
+    color: var(--on-surface);
+  }
+
+  .text-on-surface-variant {
+    color: var(--on-surface-variant);
+  }
+
+  /* Gradient backgrounds for hero sections */
+  .bg-gradient-to-br {
+    background-image: linear-gradient(to bottom right, var(--primary), var(--primary-dark));
+  }
+
+  /* Custom backdrop blur for modals and navigation */
+  .backdrop-blur-md {
+    backdrop-filter: blur(12px);
+  }
+
+  .backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+  }
+
+  /* Custom card styles */
+  .card-academic {
+    border-left: 4px solid var(--academic);
+  }
+
+  .card-corporate {
+    border-left: 4px solid var(--corporate);
+  }
+
+  /* Progress bar customizations */
+  .progress-academic .progress-bar {
+    background-color: var(--academic);
+  }
+
+  .progress-corporate .progress-bar {
+    background-color: var(--corporate);
+  }
+
+  /* Badge variations */
+  .badge-academic {
+    background-color: var(--academic);
+    color: var(--academic-foreground);
+  }
+
+  .badge-corporate {
+    background-color: var(--corporate);
+    color: var(--corporate-foreground);
+  }
+
+  /* Button hover states */
+  .btn-primary:hover {
+    background-color: var(--primary-dark);
+  }
+
+  .btn-academic:hover {
+    background-color: hsl(291, 64%, 35%);
+  }
+
+  .btn-corporate:hover {
+    background-color: hsl(31, 100%, 40%);
+  }
+
+  /* Custom animations for loading states */
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: .5;
+    }
+  }
+
+  /* Line clamp utility for truncating text */
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  /* Custom scrollbar styles */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: var(--muted-foreground);
+  }
+}
+
+@layer utilities {
+  /* Spacing utilities that match the design system */
+  .space-y-8 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 2rem;
+  }
+
+  .space-x-8 > :not([hidden]) ~ :not([hidden]) {
+    margin-left: 2rem;
+  }
+
+  /* Text size utilities for better typography hierarchy */
+  .text-2xs {
+    font-size: 0.625rem;
+    line-height: 0.75rem;
+  }
+
+  /* Custom width utilities */
+  .w-128 {
+    width: 32rem;
+  }
+
+  .max-w-8xl {
+    max-width: 96rem;
+  }
+
+  /* Z-index utilities for proper layering */
+  .z-60 {
+    z-index: 60;
+  }
+
+  .z-70 {
+    z-index: 70;
+  }
+
+  /* Custom transition utilities */
+  .transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  .transition-colors {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  /* Focus states for accessibility */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary;
+  }
+
+  .focus-ring-inset {
+    @apply focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary;
+  }
+}
