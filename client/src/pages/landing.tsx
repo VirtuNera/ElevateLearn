@@ -69,7 +69,7 @@ export default function Landing() {
             <Button
               size="lg"
               variant="outline"
-              className="border-2 border-white text-white hover:bg-white/10 font-semibold text-lg"
+              className="border-2 border-white hover:bg-white/10 font-semibold text-lg text-[#2e5b7f]"
             >
               Browse Public Courses
             </Button>
