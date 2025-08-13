@@ -31,7 +31,17 @@ export default function LearnerDashboard() {
   const [levelFilter, setLevelFilter] = useState('all');
 
   const { data: courses = [], isLoading: coursesLoading } = useQuery({
-    queryKey: ['/api/courses', { search: searchQuery, type: typeFilter !== 'all' ? typeFilter : undefined }],
+    queryKey: ['/api/courses', searchQuery, typeFilter, levelFilter],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (searchQuery) params.append('search', searchQuery);
+      if (typeFilter !== 'all') params.append('type', typeFilter);
+      if (levelFilter !== 'all') params.append('level', levelFilter);
+      
+      const response = await fetch(`/api/courses?${params.toString()}`);
+      if (!response.ok) throw new Error('Failed to fetch courses');
+      return response.json();
+    },
   });
 
   const { data: enrollments = [], isLoading: enrollmentsLoading } = useQuery({
