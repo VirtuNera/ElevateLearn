@@ -352,6 +352,153 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced analytics for admin dashboard
+  app.get('/api/admin/analytics', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const analyticsData = await storage.getAnalyticsData();
+      res.json(analyticsData);
+    } catch (error) {
+      console.error("Error fetching enhanced analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics data" });
+    }
+  });
+
+  // Admin user management routes
+  app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { role, search } = req.query;
+      const users = await storage.getAllUsers({
+        role: role as string,
+        search: search as string,
+      });
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.put('/api/admin/users/:id/role', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { role } = req.body;
+      const updatedUser = await storage.updateUserRole(req.params.id, role);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      res.status(500).json({ message: "Failed to update user role" });
+    }
+  });
+
+  app.delete('/api/admin/users/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const success = await storage.deleteUser(req.params.id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
+  // Admin course management routes
+  app.get('/api/admin/courses/pending', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const pendingCourses = await storage.getPendingCourses();
+      res.json(pendingCourses);
+    } catch (error) {
+      console.error("Error fetching pending courses:", error);
+      res.status(500).json({ message: "Failed to fetch pending courses" });
+    }
+  });
+
+  app.put('/api/admin/courses/:id/approve', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const approvedCourse = await storage.approveCourse(req.params.id);
+      
+      if (!approvedCourse) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+      
+      res.json(approvedCourse);
+    } catch (error) {
+      console.error("Error approving course:", error);
+      res.status(500).json({ message: "Failed to approve course" });
+    }
+  });
+
+  app.delete('/api/admin/courses/:id/reject', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const success = await storage.rejectCourse(req.params.id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error rejecting course:", error);
+      res.status(500).json({ message: "Failed to reject course" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

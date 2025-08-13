@@ -77,6 +77,33 @@ export interface IStorage {
   getCompletedEnrollmentsCount(): Promise<number>;
   getCertificationsCount(): Promise<number>;
 
+  // Admin-specific operations
+  getAllUsers(filters?: { role?: string; search?: string }): Promise<User[]>;
+  updateUserRole(userId: string, role: string): Promise<User | undefined>;
+  deleteUser(userId: string): Promise<boolean>;
+  getPendingCourses(): Promise<Course[]>;
+  approveCourse(courseId: string): Promise<Course | undefined>;
+  rejectCourse(courseId: string): Promise<boolean>;
+  getAnalyticsData(): Promise<{
+    totalUsers: number;
+    totalCourses: number;
+    activeEnrollments: number;
+    completedEnrollments: number;
+    monthlyStats: {
+      month: string;
+      enrollments: number;
+      completions: number;
+    }[];
+    coursesByCategory: {
+      category: string;
+      count: number;
+    }[];
+    usersByRole: {
+      role: string;
+      count: number;
+    }[];
+  }>;
+
   // Mentor-specific operations
   getStudentsByMentor(mentorId: string): Promise<(User & { enrollments: (Enrollment & { course: Course })[] })[]>;
   getAssignmentsByMentor(mentorId: string): Promise<(Assignment & { course: Course; submissions: AssignmentSubmission[] })[]>;
@@ -469,6 +496,133 @@ export class DatabaseStorage implements IStorage {
     }
 
     return result;
+  }
+
+  // Admin-specific operations
+  async getAllUsers(filters?: { role?: string; search?: string }): Promise<User[]> {
+    let query = db.select().from(users);
+    
+    if (filters?.role) {
+      query = query.where(eq(users.role, filters.role as any));
+    }
+    
+    if (filters?.search) {
+      query = query.where(
+        or(
+          like(users.firstName, `%${filters.search}%`),
+          like(users.lastName, `%${filters.search}%`),
+          like(users.email, `%${filters.search}%`)
+        )
+      );
+    }
+    
+    return await query.orderBy(users.firstName, users.lastName);
+  }
+
+  async updateUserRole(userId: string, role: string): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ role: role as any, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async deleteUser(userId: string): Promise<boolean> {
+    const result = await db.delete(users).where(eq(users.id, userId));
+    return result.rowCount > 0;
+  }
+
+  async getPendingCourses(): Promise<Course[]> {
+    return await db.select().from(courses)
+      .where(eq(courses.isPublic, false))
+      .orderBy(desc(courses.createdAt));
+  }
+
+  async approveCourse(courseId: string): Promise<Course | undefined> {
+    const [course] = await db
+      .update(courses)
+      .set({ isPublic: true, updatedAt: new Date() })
+      .where(eq(courses.id, courseId))
+      .returning();
+    return course;
+  }
+
+  async rejectCourse(courseId: string): Promise<boolean> {
+    const result = await db.delete(courses).where(eq(courses.id, courseId));
+    return result.rowCount > 0;
+  }
+
+  async getAnalyticsData(): Promise<{
+    totalUsers: number;
+    totalCourses: number;
+    activeEnrollments: number;
+    completedEnrollments: number;
+    monthlyStats: {
+      month: string;
+      enrollments: number;
+      completions: number;
+    }[];
+    coursesByCategory: {
+      category: string;
+      count: number;
+    }[];
+    usersByRole: {
+      role: string;
+      count: number;
+    }[];
+  }> {
+    // Get basic counts
+    const [totalUsers] = await db.select({ count: count() }).from(users);
+    const [totalCourses] = await db.select({ count: count() }).from(courses);
+    const [activeEnrollments] = await db.select({ count: count() })
+      .from(enrollments).where(eq(enrollments.status, 'active'));
+    const [completedEnrollments] = await db.select({ count: count() })
+      .from(enrollments).where(eq(enrollments.status, 'completed'));
+
+    // Get users by role
+    const usersByRole = await db
+      .select({
+        role: users.role,
+        count: count()
+      })
+      .from(users)
+      .groupBy(users.role);
+
+    // Get courses by category
+    const coursesByCategory = await db
+      .select({
+        category: courses.category,
+        count: count()
+      })
+      .from(courses)
+      .groupBy(courses.category);
+
+    // Generate mock monthly stats (in a real app, this would come from actual data)
+    const monthlyStats = [
+      { month: 'Jan', enrollments: 45, completions: 32 },
+      { month: 'Feb', enrollments: 52, completions: 41 },
+      { month: 'Mar', enrollments: 67, completions: 53 },
+      { month: 'Apr', enrollments: 72, completions: 61 },
+      { month: 'May', enrollments: 83, completions: 74 },
+      { month: 'Jun', enrollments: 91, completions: 82 },
+    ];
+
+    return {
+      totalUsers: totalUsers.count,
+      totalCourses: totalCourses.count,
+      activeEnrollments: activeEnrollments.count,
+      completedEnrollments: completedEnrollments.count,
+      monthlyStats,
+      coursesByCategory: coursesByCategory.map(c => ({
+        category: c.category || 'Uncategorized',
+        count: c.count
+      })),
+      usersByRole: usersByRole.map(u => ({
+        role: u.role,
+        count: u.count
+      }))
+    };
   }
 }
 
