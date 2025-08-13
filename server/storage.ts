@@ -26,7 +26,7 @@ import {
   type InsertNotification,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, asc, like, or, count } from "drizzle-orm";
+import { eq, and, desc, asc, like, or, count, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -76,6 +76,10 @@ export interface IStorage {
   getActiveEnrollmentsCount(): Promise<number>;
   getCompletedEnrollmentsCount(): Promise<number>;
   getCertificationsCount(): Promise<number>;
+
+  // Mentor-specific operations
+  getStudentsByMentor(mentorId: string): Promise<(User & { enrollments: (Enrollment & { course: Course })[] })[]>;
+  getAssignmentsByMentor(mentorId: string): Promise<(Assignment & { course: Course; submissions: AssignmentSubmission[] })[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -381,6 +385,90 @@ export class DatabaseStorage implements IStorage {
   async getCertificationsCount(): Promise<number> {
     const [result] = await db.select({ count: count() }).from(certifications);
     return result.count;
+  }
+
+  // Mentor-specific operations
+  async getStudentsByMentor(mentorId: string): Promise<(User & { enrollments: (Enrollment & { course: Course })[] })[]> {
+    const mentorCourses = await this.getCoursesByMentor(mentorId);
+    const courseIds = mentorCourses.map(course => course.id);
+    
+    if (courseIds.length === 0) return [];
+
+    const enrollmentsWithDetails = await db
+      .select({
+        user: users,
+        enrollment: enrollments,
+        course: courses,
+      })
+      .from(enrollments)
+      .leftJoin(users, eq(enrollments.userId, users.id))
+      .leftJoin(courses, eq(enrollments.courseId, courses.id))
+      .where(
+        and(
+          eq(enrollments.status, 'active'),
+          inArray(enrollments.courseId, courseIds)
+        )
+      )
+      .orderBy(users.firstName, users.lastName);
+
+    // Group by user
+    const studentMap = new Map<string, User & { enrollments: (Enrollment & { course: Course })[] }>();
+    
+    for (const row of enrollmentsWithDetails) {
+      if (!row.user) continue;
+      
+      if (!studentMap.has(row.user.id)) {
+        studentMap.set(row.user.id, {
+          ...row.user,
+          enrollments: []
+        });
+      }
+      
+      if (row.enrollment && row.course) {
+        studentMap.get(row.user.id)!.enrollments.push({
+          ...row.enrollment,
+          course: row.course
+        });
+      }
+    }
+
+    return Array.from(studentMap.values());
+  }
+
+  async getAssignmentsByMentor(mentorId: string): Promise<(Assignment & { course: Course; submissions: AssignmentSubmission[] })[]> {
+    const mentorCourses = await this.getCoursesByMentor(mentorId);
+    const courseIds = mentorCourses.map(course => course.id);
+    
+    if (courseIds.length === 0) return [];
+
+    const assignmentsWithCourses = await db
+      .select({
+        assignment: assignments,
+        course: courses,
+      })
+      .from(assignments)
+      .leftJoin(courses, eq(assignments.courseId, courses.id))
+      .where(inArray(assignments.courseId, courseIds))
+      .orderBy(desc(assignments.createdAt));
+
+    // Get submissions for each assignment
+    const result = [];
+    for (const row of assignmentsWithCourses) {
+      if (!row.assignment || !row.course) continue;
+      
+      const submissions = await db
+        .select()
+        .from(assignmentSubmissions)
+        .where(eq(assignmentSubmissions.assignmentId, row.assignment.id));
+
+      result.push({
+        ...row.assignment,
+        course: row.course,
+        submissions
+      });
+    }
+
+    return result;
   }
 }
 

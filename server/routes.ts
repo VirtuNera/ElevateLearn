@@ -90,6 +90,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get students for mentor's courses
+  app.get('/api/mentor/students', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const students = await storage.getStudentsByMentor(userId);
+      res.json(students);
+    } catch (error) {
+      console.error("Error fetching mentor students:", error);
+      res.status(500).json({ message: "Failed to fetch mentor students" });
+    }
+  });
+
+  // Get assignments for mentor's courses  
+  app.get('/api/mentor/assignments', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const assignments = await storage.getAssignmentsByMentor(userId);
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error fetching mentor assignments:", error);
+      res.status(500).json({ message: "Failed to fetch mentor assignments" });
+    }
+  });
+
+  // Get submissions for a specific assignment
+  app.get('/api/assignments/:id/submissions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.role !== 'mentor' && user?.role !== 'admin') {
+        return res.status(403).json({ message: "Only mentors and admins can view submissions" });
+      }
+
+      const submissions = await storage.getSubmissionsByAssignment(req.params.id);
+      res.json(submissions);
+    } catch (error) {
+      console.error("Error fetching assignment submissions:", error);
+      res.status(500).json({ message: "Failed to fetch assignment submissions" });
+    }
+  });
+
   // Enrollment routes
   app.post('/api/enrollments', isAuthenticated, async (req: any, res) => {
     try {
