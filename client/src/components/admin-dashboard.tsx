@@ -83,7 +83,7 @@ interface EnhancedAnalytics {
 
 export default function AdminDashboard() {
   const [activeView, setActiveView] = useState<'overview' | 'users' | 'courses' | 'analytics'>('overview');
-  const [userFilters, setUserFilters] = useState({ role: '', search: '' });
+  const [userFilters, setUserFilters] = useState({ role: 'all', search: '' });
   const [courseFilter, setCourseFilter] = useState('pending');
   const { toast } = useToast();
 
@@ -100,7 +100,7 @@ export default function AdminDashboard() {
     enabled: activeView === 'users',
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (userFilters.role) params.append('role', userFilters.role);
+      if (userFilters.role && userFilters.role !== 'all') params.append('role', userFilters.role);
       if (userFilters.search) params.append('search', userFilters.search);
       const response = await fetch(`/api/admin/users?${params}`);
       return response.json();
@@ -401,7 +401,7 @@ export default function AdminDashboard() {
                     <SelectValue placeholder="Filter by role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Roles</SelectItem>
+                    <SelectItem value="all">All Roles</SelectItem>
                     <SelectItem value="learner">Learner</SelectItem>
                     <SelectItem value="mentor">Mentor</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
