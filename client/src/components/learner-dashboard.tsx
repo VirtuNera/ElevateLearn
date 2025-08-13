@@ -215,10 +215,10 @@ export default function LearnerDashboard() {
             <h2 className="text-xl font-semibold text-on-surface mb-4">Browse by Category</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { icon: Code, name: 'Technology', count: 245, color: 'text-primary' },
-                { icon: TrendingUp, name: 'Business', count: 189, color: 'text-secondary' },
-                { icon: Microscope, name: 'Science', count: 156, color: 'text-academic' },
-                { icon: Palette, name: 'Creative', count: 98, color: 'text-corporate' },
+                { icon: Code, name: 'Technology', count: 5, color: 'text-primary' },
+                { icon: TrendingUp, name: 'Business', count: 4, color: 'text-secondary' },
+                { icon: Microscope, name: 'Science', count: 3, color: 'text-academic' },
+                { icon: Palette, name: 'Creative', count: 3, color: 'text-corporate' },
               ].map((category) => {
                 const Icon = category.icon;
                 return (
