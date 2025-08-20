@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import CourseCard from "@/components/course-card";
+import { Link } from "wouter";
 import { 
   Search, 
   BookOpen, 
@@ -304,8 +305,12 @@ export default function LearnerDashboard() {
                       </p>
                     </div>
                     <div className="flex gap-3">
-                      <Button>Continue</Button>
-                      <Button variant="outline">View Details</Button>
+                      <Link href={`/course/${enrollment.course.id}`}>
+                        <Button>Continue</Button>
+                      </Link>
+                      <Link href={`/course/${enrollment.course.id}`}>
+                        <Button variant="outline">View Details</Button>
+                      </Link>
                     </div>
                   </div>
                 </CardContent>
