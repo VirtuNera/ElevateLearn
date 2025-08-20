@@ -255,6 +255,86 @@ const demoCourses = [
     imageUrl: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&h=200&fit=crop",
     isPublic: true,
     maxStudents: 16,
+  },
+
+  // Pending Courses (awaiting admin approval)
+  {
+    id: "course-pending-1",
+    title: "Advanced Artificial Intelligence",
+    description: "Comprehensive study of AI algorithms, neural networks, deep learning, and practical applications in modern industries.",
+    type: "academic" as const,
+    mentorId: "demo-mentor-1",
+    duration: "16 weeks",
+    difficulty: "advanced",
+    category: "Technology",
+    imageUrl: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=200&fit=crop",
+    isPublic: false,
+    maxStudents: 12,
+  },
+  {
+    id: "course-pending-2",
+    title: "Blockchain and Cryptocurrency Fundamentals",
+    description: "Learn blockchain technology, cryptocurrency mechanics, smart contracts, and decentralized applications.",
+    type: "corporate" as const,
+    mentorId: "demo-mentor-1",
+    duration: "8 weeks",
+    difficulty: "intermediate",
+    category: "Technology",
+    imageUrl: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=400&h=200&fit=crop",
+    isPublic: false,
+    maxStudents: 20,
+  },
+  {
+    id: "course-pending-3",
+    title: "Entrepreneurship and Startup Strategy",
+    description: "Master the fundamentals of starting a business, from idea validation to scaling and funding strategies.",
+    type: "corporate" as const,
+    mentorId: "demo-mentor-1",
+    duration: "10 weeks",
+    difficulty: "intermediate",
+    category: "Business",
+    imageUrl: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&h=200&fit=crop",
+    isPublic: false,
+    maxStudents: 25,
+  },
+  {
+    id: "course-pending-4",
+    title: "Advanced Data Visualization with Python",
+    description: "Create compelling data visualizations using matplotlib, seaborn, plotly, and interactive dashboard development.",
+    type: "academic" as const,
+    mentorId: "demo-mentor-1",
+    duration: "6 weeks",
+    difficulty: "advanced",
+    category: "Technology",
+    imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=200&fit=crop",
+    isPublic: false,
+    maxStudents: 18,
+  },
+  {
+    id: "course-pending-5",
+    title: "Motion Graphics and Animation",
+    description: "Learn professional motion graphics and animation techniques using After Effects and Cinema 4D.",
+    type: "corporate" as const,
+    mentorId: "demo-mentor-1",
+    duration: "12 weeks",
+    difficulty: "intermediate",
+    category: "Creative",
+    imageUrl: "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=400&h=200&fit=crop",
+    isPublic: false,
+    maxStudents: 15,
+  },
+  {
+    id: "course-pending-6",
+    title: "Climate Science and Policy",
+    description: "Explore climate change science, environmental policy, and sustainable solutions for global challenges.",
+    type: "academic" as const,
+    mentorId: "demo-mentor-1",
+    duration: "14 weeks",
+    difficulty: "intermediate",
+    category: "Science",
+    imageUrl: "https://images.unsplash.com/photo-1569163139394-de44aa7273d2?w=400&h=200&fit=crop",
+    isPublic: false,
+    maxStudents: 22,
   }
 ];
 
@@ -296,33 +376,45 @@ const demoCertifications = [
 // Function to seed demo data into the database
 async function seedDemoData() {
   try {
-    // Check if courses already exist to avoid duplicates
-    const existingCourses = await storage.getCourses();
-    if (existingCourses.length > 0) {
-      return; // Data already seeded
-    }
-
     // Create demo users first
     for (const user of demoUsers) {
       await storage.upsertUser(user);
     }
 
-    // Create demo courses
-    for (const course of demoCourses) {
-      await storage.createCourse(course);
-    }
+    // Check if courses already exist to avoid duplicates
+    const existingCourses = await storage.getCourses();
+    const pendingCourses = await storage.getPendingCourses();
+    
+    if (existingCourses.length === 0) {
+      // Create demo courses if none exist
+      for (const course of demoCourses) {
+        await storage.createCourse(course);
+      }
 
-    // Create demo enrollments
-    for (const enrollment of demoEnrollments) {
-      await storage.createEnrollment(enrollment);
-    }
+      // Create demo enrollments
+      for (const enrollment of demoEnrollments) {
+        await storage.createEnrollment(enrollment);
+      }
 
-    // Create demo certifications
-    for (const certification of demoCertifications) {
-      await storage.createCertification(certification);
-    }
+      // Create demo certifications
+      for (const certification of demoCertifications) {
+        await storage.createCertification(certification);
+      }
 
-    console.log("Demo data seeded successfully");
+      console.log("Demo data seeded successfully");
+    } else {
+      // If courses exist but no pending courses, add the pending ones
+      if (pendingCourses.length === 0) {
+        const pendingCoursesToAdd = demoCourses.filter(course => !course.isPublic);
+        for (const course of pendingCoursesToAdd) {
+          const existingCourse = await storage.getCourse(course.id);
+          if (!existingCourse) {
+            await storage.createCourse(course);
+          }
+        }
+        console.log("Pending demo courses added successfully");
+      }
+    }
   } catch (error) {
     console.error("Error seeding demo data:", error);
   }
