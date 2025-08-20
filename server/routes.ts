@@ -79,6 +79,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update course
+  app.put('/api/courses/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.role !== 'mentor' && user?.role !== 'admin') {
+        return res.status(403).json({ message: "Only mentors and admins can update courses" });
+      }
+
+      const courseId = req.params.id;
+      const course = await storage.getCourse(courseId);
+      
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+      
+      // Check if the user is the mentor of this course or an admin
+      if (user.role === 'mentor' && course.mentorId !== userId) {
+        return res.status(403).json({ message: "You can only update your own courses" });
+      }
+
+      const updates = req.body;
+      const updatedCourse = await storage.updateCourse(courseId, updates);
+      res.json(updatedCourse);
+    } catch (error) {
+      console.error("Error updating course:", error);
+      res.status(500).json({ message: "Failed to update course" });
+    }
+  });
+
   app.get('/api/mentor/courses', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;

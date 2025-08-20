@@ -7,6 +7,8 @@ import { useAuth } from "@/hooks/useAuth";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import CoursePage from "@/pages/course";
+import CreateCoursePage from "@/pages/create-course";
+import EditCoursePage from "@/pages/edit-course";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -20,6 +22,8 @@ function Router() {
         <>
           <Route path="/" component={Dashboard} />
           <Route path="/course/:id" component={CoursePage} />
+          <Route path="/create-course" component={CreateCoursePage} />
+          <Route path="/edit-course/:id" component={EditCoursePage} />
         </>
       )}
       <Route component={NotFound} />

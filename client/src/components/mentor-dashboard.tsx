@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +47,7 @@ import {
 export default function MentorDashboard() {
   const [activeView, setActiveView] = useState<'overview' | 'courses' | 'students' | 'assignments'>('overview');
   const [searchTerm, setSearchTerm] = useState('');
+  const [, setLocation] = useLocation();
 
   const { data: mentorCourses = [], isLoading: coursesLoading } = useQuery({
     queryKey: ['/api/mentor/courses'],
@@ -70,7 +72,10 @@ export default function MentorDashboard() {
           <h1 className="text-3xl font-bold text-on-surface mb-2">Mentor Dashboard</h1>
           <p className="text-on-surface-variant">Manage your courses, students, and teaching materials.</p>
         </div>
-        <Button className="flex items-center space-x-2">
+        <Button 
+          className="flex items-center space-x-2"
+          onClick={() => setLocation('/create-course')}
+        >
           <Plus className="h-4 w-4" />
           <span>Create Course</span>
         </Button>
@@ -205,7 +210,11 @@ export default function MentorDashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Button variant="outline" className="h-20 flex flex-col items-center space-y-2">
+                <Button 
+                  variant="outline" 
+                  className="h-20 flex flex-col items-center space-y-2"
+                  onClick={() => setLocation('/create-course')}
+                >
                   <Plus className="h-5 w-5" />
                   <span className="text-sm">Create Course</span>
                 </Button>
@@ -252,7 +261,7 @@ export default function MentorDashboard() {
                 <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-on-surface mb-2">No courses yet</h3>
                 <p className="text-on-surface-variant mb-4">Create your first course to start teaching</p>
-                <Button>Create Course</Button>
+                <Button onClick={() => setLocation('/create-course')}>Create Course</Button>
               </CardContent>
             </Card>
           ) : (
@@ -284,7 +293,13 @@ export default function MentorDashboard() {
                         </div>
                       </div>
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">Edit</Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setLocation(`/edit-course/${course.id}`)}
+                        >
+                          Edit
+                        </Button>
                         <Button size="sm">View Details</Button>
                       </div>
                     </div>
