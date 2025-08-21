@@ -20,10 +20,12 @@ import {
   Code,
   TrendingUp,
   Microscope,
-  Palette
+  Palette,
+  Brain
 } from "lucide-react";
+import LearnerNuraAI from './learner-nura-ai';
 
-type TabType = 'learning-hub' | 'active-courses' | 'completed' | 'credentials';
+type TabType = 'learning-hub' | 'active-courses' | 'completed' | 'credentials' | 'nura-ai';
 
 export default function LearnerDashboard() {
   const [activeTab, setActiveTab] = useState<TabType>('learning-hub');
@@ -61,6 +63,7 @@ export default function LearnerDashboard() {
     { id: 'active-courses', label: 'Active Courses', icon: PlayCircle },
     { id: 'completed', label: 'Completed', icon: CheckCircle },
     { id: 'credentials', label: 'Credentials', icon: Award },
+    { id: 'nura-ai', label: 'Nura AI', icon: Brain },
   ];
 
   return (
@@ -419,6 +422,11 @@ export default function LearnerDashboard() {
             ))
           )}
         </div>
+      )}
+
+      {/* Nura AI Tab */}
+      {activeTab === 'nura-ai' && (
+        <LearnerNuraAI />
       )}
     </div>
   );

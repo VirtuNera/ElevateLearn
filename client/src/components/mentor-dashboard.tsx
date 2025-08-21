@@ -41,11 +41,13 @@ import {
   Search,
   MoreHorizontal,
   Edit,
-  Trash
+  Trash,
+  Brain
 } from "lucide-react";
+import MentorNuraAI from './mentor-nura-ai';
 
 export default function MentorDashboard() {
-  const [activeView, setActiveView] = useState<'overview' | 'courses' | 'students' | 'assignments'>('overview');
+  const [activeView, setActiveView] = useState<'overview' | 'courses' | 'students' | 'assignments' | 'nura-ai'>('overview');
   const [searchTerm, setSearchTerm] = useState('');
   const [, setLocation] = useLocation();
 
@@ -148,6 +150,7 @@ export default function MentorDashboard() {
             { id: 'courses', label: 'My Courses', icon: GraduationCap },
             { id: 'students', label: 'Students', icon: Users },
             { id: 'assignments', label: 'Assignments', icon: CheckCircle },
+            { id: 'nura-ai', label: 'Nura AI', icon: Brain },
           ].map((tab) => {
             const Icon = tab.icon;
             return (
@@ -889,6 +892,11 @@ export default function MentorDashboard() {
             </TabsContent>
           </Tabs>
         </div>
+      )}
+
+      {/* Nura AI Tab */}
+      {activeView === 'nura-ai' && (
+        <MentorNuraAI />
       )}
     </div>
   );

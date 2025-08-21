@@ -30,8 +30,10 @@ import {
   Plus,
   Download,
   Upload,
-  RefreshCw
+  RefreshCw,
+  Brain
 } from "lucide-react";
+import AdminNuraAI from './admin-nura-ai';
 
 interface User {
   id: string;
@@ -82,7 +84,7 @@ interface EnhancedAnalytics {
 }
 
 export default function AdminDashboard() {
-  const [activeView, setActiveView] = useState<'overview' | 'users' | 'courses' | 'analytics'>('overview');
+  const [activeView, setActiveView] = useState<'overview' | 'users' | 'courses' | 'analytics' | 'nura-ai'>('overview');
   const [userFilters, setUserFilters] = useState({ role: 'all', search: '' });
   const [courseFilter, setCourseFilter] = useState('pending');
   const { toast } = useToast();
@@ -179,6 +181,7 @@ export default function AdminDashboard() {
     { id: 'users', label: 'User Management', icon: Users },
     { id: 'courses', label: 'Course Approval', icon: BookOpen },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp },
+    { id: 'nura-ai', label: 'Nura AI', icon: Brain },
   ];
 
   return (
@@ -976,6 +979,11 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         </div>
+      )}
+
+      {/* Nura AI Tab */}
+      {activeView === 'nura-ai' && (
+        <AdminNuraAI />
       )}
     </div>
   );
