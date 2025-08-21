@@ -23,7 +23,9 @@ import {
   Zap,
   Target,
   TrendingUp,
-  Award
+  Award,
+  FileText,
+  User
 } from 'lucide-react';
 
 const mockStudyPlan = [
@@ -46,6 +48,8 @@ export default function LearnerNuraAI() {
   const [isElinLoading, setIsElinLoading] = useState(false);
   const [isPlanGenerating, setIsPlanGenerating] = useState(false);
   const [showQuizFeedback, setShowQuizFeedback] = useState(false);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [showLearnerReport, setShowLearnerReport] = useState(false);
 
   const handleElinSubmit = async () => {
     if (!elinInput.trim()) return;
@@ -75,6 +79,14 @@ Would you like me to provide some specific examples or practice exercises?`);
     }, 3000);
   };
 
+  const generateLearnerReport = async () => {
+    setIsGeneratingReport(true);
+    setTimeout(() => {
+      setIsGeneratingReport(false);
+      setShowLearnerReport(true);
+    }, 3000);
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -87,7 +99,7 @@ Would you like me to provide some specific examples or practice exercises?`);
       </div>
 
       <Tabs defaultValue="planner" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="planner" className="flex items-center space-x-2">
             <Calendar className="h-4 w-4" />
             <span>Study Planner</span>
@@ -103,6 +115,10 @@ Would you like me to provide some specific examples or practice exercises?`);
           <TabsTrigger value="feedback" className="flex items-center space-x-2">
             <CheckCircle className="h-4 w-4" />
             <span>Quiz Help</span>
+          </TabsTrigger>
+          <TabsTrigger value="report" className="flex items-center space-x-2">
+            <FileText className="h-4 w-4" />
+            <span>My Report</span>
           </TabsTrigger>
         </TabsList>
 
@@ -321,7 +337,7 @@ Would you like me to provide some specific examples or practice exercises?`);
                           <span>A programming language</span>
                         </label>
                         <label className="flex items-center space-x-2">
-                          <input type="radio" name="quiz" value="b" checked />
+                          <input type="radio" name="quiz" value="b" defaultChecked readOnly />
                           <span>A method of data analysis that automates analytical model building</span>
                         </label>
                         <label className="flex items-center space-x-2">
@@ -373,6 +389,211 @@ Would you like me to provide some specific examples or practice exercises?`);
                     </CollapsibleContent>
                   </Collapsible>
                 </div>
+              )}
+            </div>
+          </NuraAISection>
+        </TabsContent>
+
+        {/* Generate Learner Report */}
+        <TabsContent value="report">
+          <NuraAISection
+            title="Generate Learner Report"
+            description="AI-powered comprehensive analysis of your learning progress, strengths, and recommendations"
+          >
+            <div className="space-y-6">
+              {/* Generate Button */}
+              <div className="text-center">
+                <Button 
+                  onClick={generateLearnerReport} 
+                  disabled={isGeneratingReport}
+                  className="bg-indigo-600 hover:bg-indigo-700"
+                  size="lg"
+                >
+                  {isGeneratingReport ? (
+                    <>
+                      <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                      Analyzing Your Progress...
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="h-5 w-5 mr-2" />
+                      Generate My Report
+                    </>
+                  )}
+                </Button>
+                <p className="text-sm text-muted-foreground mt-2">
+                  This will analyze your learning data to provide personalized insights
+                </p>
+              </div>
+
+              {/* Report Results */}
+              {showLearnerReport && (
+                <Collapsible defaultOpen>
+                  <CollapsibleTrigger asChild>
+                    <Card className="cursor-pointer hover:bg-gray-50">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <User className="h-5 w-5 text-indigo-600" />
+                            <span className="font-medium text-lg">Your Learning Report</span>
+                          </div>
+                          <ChevronDown className="h-4 w-4" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="space-y-4 mt-4">
+                      {/* Strengths */}
+                      <Card className="bg-green-50 border-green-200">
+                        <CardHeader>
+                          <CardTitle className="text-lg flex items-center space-x-2">
+                            <Star className="h-5 w-5 text-green-600" />
+                            <span>Your Strengths</span>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ul className="space-y-2">
+                            <li className="flex items-center space-x-2">
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                              <span className="text-sm">Strong problem-solving skills demonstrated in Data Science coursework</span>
+                            </li>
+                            <li className="flex items-center space-x-2">
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                              <span className="text-sm">Consistent engagement with creative writing assignments</span>
+                            </li>
+                            <li className="flex items-center space-x-2">
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                              <span className="text-sm">High completion rate across all enrolled courses (89%)</span>
+                            </li>
+                            <li className="flex items-center space-x-2">
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                              <span className="text-sm">Active participation in collaborative projects</span>
+                            </li>
+                          </ul>
+                        </CardContent>
+                      </Card>
+
+                      {/* Skill Gaps */}
+                      <Card className="bg-yellow-50 border-yellow-200">
+                        <CardHeader>
+                          <CardTitle className="text-lg flex items-center space-x-2">
+                            <Target className="h-5 w-5 text-yellow-600" />
+                            <span>Areas for Improvement</span>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ul className="space-y-2">
+                            <li className="flex items-center space-x-2">
+                              <Clock className="h-4 w-4 text-yellow-600" />
+                              <span className="text-sm">JavaScript fundamentals - review recommended for Full Stack course</span>
+                            </li>
+                            <li className="flex items-center space-x-2">
+                              <Clock className="h-4 w-4 text-yellow-600" />
+                              <span className="text-sm">Statistical analysis concepts for advanced data science topics</span>
+                            </li>
+                            <li className="flex items-center space-x-2">
+                              <Clock className="h-4 w-4 text-yellow-600" />
+                              <span className="text-sm">Time management - some assignment submissions near deadlines</span>
+                            </li>
+                          </ul>
+                        </CardContent>
+                      </Card>
+
+                      {/* Certifications Summary */}
+                      <Card className="bg-blue-50 border-blue-200">
+                        <CardHeader>
+                          <CardTitle className="text-lg flex items-center space-x-2">
+                            <Award className="h-5 w-5 text-blue-600" />
+                            <span>Certifications Summary</span>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-medium">Earned Certifications</span>
+                              <Badge className="bg-blue-600">2 Completed</Badge>
+                            </div>
+                            <ul className="space-y-2">
+                              <li className="flex items-center space-x-2">
+                                <Award className="h-4 w-4 text-blue-600" />
+                                <span className="text-sm">Creative Writing Fundamentals</span>
+                                <Badge variant="outline" className="text-xs">Dec 2024</Badge>
+                              </li>
+                              <li className="flex items-center space-x-2">
+                                <Award className="h-4 w-4 text-blue-600" />
+                                <span className="text-sm">Business Communication Basics</span>
+                                <Badge variant="outline" className="text-xs">Jan 2025</Badge>
+                              </li>
+                            </ul>
+                            <div className="border-t pt-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium">In Progress</span>
+                                <Badge variant="secondary">1 Course</Badge>
+                              </div>
+                              <div className="flex items-center space-x-2 mt-1">
+                                <Clock className="h-4 w-4 text-gray-500" />
+                                <span className="text-sm">Data Science Fundamentals</span>
+                                <Progress value={68} className="w-20" />
+                                <span className="text-xs text-muted-foreground">68%</span>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Suggested Actions */}
+                      <Card className="bg-indigo-50 border-indigo-200">
+                        <CardHeader>
+                          <CardTitle className="text-lg flex items-center space-x-2">
+                            <Lightbulb className="h-5 w-5 text-indigo-600" />
+                            <span>Suggested Actions</span>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="p-3 bg-white rounded border">
+                              <div className="flex items-start space-x-3">
+                                <div className="bg-indigo-100 p-1 rounded">
+                                  <BookOpen className="h-4 w-4 text-indigo-600" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium">Complete JavaScript Review</p>
+                                  <p className="text-xs text-muted-foreground">Spend 2-3 hours reviewing JavaScript basics before continuing Full Stack Development</p>
+                                </div>
+                                <Button size="sm" variant="outline">Start</Button>
+                              </div>
+                            </div>
+                            <div className="p-3 bg-white rounded border">
+                              <div className="flex items-start space-x-3">
+                                <div className="bg-green-100 p-1 rounded">
+                                  <Target className="h-4 w-4 text-green-600" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium">Set Study Schedule</p>
+                                  <p className="text-xs text-muted-foreground">Use the Smart Study Planner to create a consistent learning schedule</p>
+                                </div>
+                                <Button size="sm" variant="outline">Plan</Button>
+                              </div>
+                            </div>
+                            <div className="p-3 bg-white rounded border">
+                              <div className="flex items-start space-x-3">
+                                <div className="bg-purple-100 p-1 rounded">
+                                  <Award className="h-4 w-4 text-purple-600" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium">Focus on Data Science</p>
+                                  <p className="text-xs text-muted-foreground">You're 68% complete - dedicate extra time this week to finish your certification</p>
+                                </div>
+                                <Button size="sm" variant="outline">Focus</Button>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
               )}
             </div>
           </NuraAISection>
