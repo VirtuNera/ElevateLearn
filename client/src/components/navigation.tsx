@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator 
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, Bell, MessageCircle, ChevronDown, LogOut, User, Settings } from "lucide-react";
+import { GraduationCap, Bell, MessageCircle, ChevronDown, LogOut, User, Settings, Sparkles } from "lucide-react";
 
 interface NavigationProps {
   currentRole?: string;
@@ -82,6 +82,20 @@ export default function Navigation({ currentRole, onRoleChange }: NavigationProp
           </div>
           
           <div className="flex items-center space-x-4">
+            {/* Nura AI Assistant */}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700"
+              onClick={() => {
+                const role = user?.role || 'learner';
+                window.location.href = `/nura-ai/${role}`;
+              }}
+            >
+              <Sparkles className="h-5 w-5 mr-2" />
+              Nura AI
+            </Button>
+            
             {/* Notifications */}
             <Button variant="ghost" size="sm" className="relative">
               <Bell className="h-5 w-5" />

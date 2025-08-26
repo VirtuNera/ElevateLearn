@@ -40,7 +40,9 @@ import {
   Search,
   MoreHorizontal,
   Edit,
-  Trash
+  Trash,
+  Sparkles,
+  TrendingUp
 } from "lucide-react";
 
 export default function MentorDashboard() {
@@ -875,6 +877,58 @@ export default function MentorDashboard() {
           </Tabs>
         </div>
       )}
+
+      {/* Nura AI Assistant Section */}
+      <div className="mt-12">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-on-surface mb-2">Nura AI for Mentors</h2>
+            <p className="text-on-surface-variant">AI-powered insights to enhance your teaching and course management</p>
+          </div>
+          <Button 
+            className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white"
+            onClick={() => window.location.href = '/nura-ai/mentor'}
+          >
+            <Sparkles className="h-5 w-5 mr-2" />
+            Open Nura AI
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
+            <CardContent className="p-6 text-center">
+              <div className="bg-indigo-600 p-3 rounded-lg w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <Sparkles className="text-white text-2xl" />
+              </div>
+              <h3 className="font-semibold text-on-surface mb-2">Course Analytics</h3>
+              <p className="text-on-surface-variant text-sm mb-4">AI-powered course performance insights</p>
+              <Button variant="outline" size="sm" className="w-full">View Analytics</Button>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
+            <CardContent className="p-6 text-center">
+              <div className="bg-indigo-600 p-3 rounded-lg w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <Users className="text-white text-2xl" />
+              </div>
+              <h3 className="font-semibold text-on-surface mb-2">Student Insights</h3>
+              <p className="text-on-surface-variant text-sm mb-4">Individual student performance analysis</p>
+              <Button variant="outline" size="sm" className="w-full">View Insights</Button>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
+            <CardContent className="p-6 text-center">
+              <div className="bg-indigo-600 p-3 rounded-lg w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <TrendingUp className="text-white text-2xl" />
+              </div>
+              <h3 className="font-semibold text-on-surface mb-2">Teaching Tips</h3>
+              <p className="text-on-surface-variant text-sm mb-4">AI-generated teaching recommendations</p>
+              <Button variant="outline" size="sm" className="w-full">Get Tips</Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

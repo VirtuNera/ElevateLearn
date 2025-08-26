@@ -30,7 +30,8 @@ import {
   Plus,
   Download,
   Upload,
-  RefreshCw
+  RefreshCw,
+  Sparkles
 } from "lucide-react";
 
 interface User {
@@ -977,6 +978,58 @@ export default function AdminDashboard() {
           </Card>
         </div>
       )}
+
+      {/* Nura AI Assistant Section */}
+      <div className="mt-12">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-on-surface mb-2">Nura AI for Administrators</h2>
+            <p className="text-on-surface-variant">AI-powered insights and analytics for system-wide optimization</p>
+          </div>
+          <Button 
+            className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white"
+            onClick={() => window.location.href = '/nura-ai/admin'}
+          >
+            <Sparkles className="h-5 w-5 mr-2" />
+            Open Nura AI
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
+            <CardContent className="p-6 text-center">
+              <div className="bg-indigo-600 p-3 rounded-lg w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <Sparkles className="text-white text-2xl" />
+              </div>
+              <h3 className="font-semibold text-on-surface mb-2">System Analytics</h3>
+              <p className="text-on-surface-variant text-sm mb-4">AI-powered system-wide performance insights</p>
+              <Button variant="outline" size="sm" className="w-full">View Analytics</Button>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
+            <CardContent className="p-6 text-center">
+              <div className="bg-indigo-600 p-3 rounded-lg w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <BarChart3 className="text-white text-2xl" />
+              </div>
+              <h3 className="font-semibold text-on-surface mb-2">Predictive Insights</h3>
+              <p className="text-on-surface-variant text-sm mb-4">AI-generated predictions and trends</p>
+              <Button variant="outline" size="sm" className="w-full">View Insights</Button>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
+            <CardContent className="p-6 text-center">
+              <div className="bg-indigo-600 p-3 rounded-lg w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <TrendingUp className="text-white text-2xl" />
+              </div>
+              <h3 className="font-semibold text-on-surface mb-2">Optimization Tips</h3>
+              <p className="text-on-surface-variant text-sm mb-4">AI recommendations for system improvement</p>
+              <Button variant="outline" size="sm" className="w-full">Get Tips</Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -7,6 +7,9 @@ import { useAuth } from "@/hooks/useAuth";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import NotFound from "@/pages/not-found";
+import LearnerNuraAI from "@/components/learner-nura-ai";
+import MentorNuraAI from "@/components/mentor-nura-ai";
+import AdminNuraAI from "@/components/admin-nura-ai";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -18,6 +21,9 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={Dashboard} />
+          <Route path="/nura-ai/learner" component={LearnerNuraAI} />
+          <Route path="/nura-ai/mentor" component={MentorNuraAI} />
+          <Route path="/nura-ai/admin" component={AdminNuraAI} />
         </>
       )}
       <Route component={NotFound} />

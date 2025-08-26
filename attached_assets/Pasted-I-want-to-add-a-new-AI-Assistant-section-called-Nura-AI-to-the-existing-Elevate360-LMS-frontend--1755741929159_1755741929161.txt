@@ -1,0 +1,114 @@
+I want to add a new AI Assistant section called **Nura AI** to the existing Elevate360 LMS frontend.
+
+The LMS already has 3 dashboards: Learner, Mentor, and Admin.
+
+Please help me implement the **frontend UI components only** for Nura AI in each dashboard, using the following stack:
+
+- Framework: React (or Vanilla JS if no framework used)
+- Styling: Tailwind CSS (or Replit-compatible CSS)
+- Structure: Modular + responsive design
+
+---
+
+### 📚 Components to Implement:
+
+1. **🔵 NuraAISection.js** (reusable component wrapper)
+   - Reusable section layout with a title, subtitle, and dynamic content slot
+   - Props: `title`, `description`, `children`
+
+---
+
+### 👨‍🎓 Learner Dashboard – Nura AI Section
+
+Add a new section called “Nura AI” below the main content area. It should include:
+
+- **Smart Study Planner**
+  - Weekly calendar view with auto-generated tasks
+  - Button: "Generate My Study Plan"
+  - Table/List layout showing:
+    - Course name
+    - Recommended time block
+    - Priority level (color coded)
+- **Explain Like I’m New (ELIN)**
+  - Input box: “What do you need help with?”
+  - Button: “Ask Nura”
+  - Output box that displays AI explanation
+- **AI Course Recommendation**
+  - Panel showing:
+    - Suggested next course
+    - Skill tags (e.g., #projectmanagement)
+    - Explanation of why it was recommended
+- **Immediate Quiz Feedback**
+  - Component to display:
+    - “Correct” / “Incorrect” label with icons
+    - Explanation of answer
+    - Suggested retry or “Review module” button
+  - Style as a collapsible card under each quiz question
+
+---
+
+### 👩‍🏫 Mentor Dashboard – Nura AI Section
+
+Add Nura AI section with:
+
+- **Auto-Summarize Learner Progress**
+  - Summary panel:
+    - “5 learners are behind”
+    - Drop-off module(s)
+    - Suggested interventions
+  - Color-coded list by group
+- **Generate Learner Report (view-only)**
+  - Dropdown to select learner
+  - Display Learner Summary Card (skills, gaps, completion %)
+- **Generate Course Report**
+  - Select course → display:
+    - Avg. completion rate
+    - Most failed quiz/module
+    - Suggested content tweaks
+
+---
+
+### 🧑‍💼 Admin Dashboard – Nura AI Section
+
+Add analytics & insight cards:
+
+- **Predictive Learning Trends**
+  - Chart: Trending skill tags
+  - List: Recommended new course areas
+- **Bias & Equity Monitor**
+  - Equity graph (e.g., bar chart of pass rates by group)
+  - Text summary of flagged concerns
+- **Generate System Report**
+  - Button: “Generate Report”
+  - Output: Summary of most active departments, course gaps, compliance %
+
+---
+
+### 📦 UI/UX Guidelines
+
+- Use clean, card-based layout with tabs or accordions for sections
+- Use Tailwind for consistency:
+  - Cards (`rounded-lg`, `shadow`, `bg-white`, `p-4`)
+  - Buttons (`bg-indigo-600`, `text-white`, `hover:bg-indigo-700`)
+- Mobile-friendly grid for responsive layouts
+- Icons: Use Heroicons (if available) for status and feedback
+- Allow props to control visibility by role (`userRole` prop)
+
+---
+
+### 🧪 Bonus (Optional)
+
+- Use mock JSON responses for now (simulate AI output)
+- Each action button (e.g., “Generate Report”) should:
+  - Simulate loading state
+  - Display dummy output in a `<pre>` or result box
+
+---
+
+Let’s start by building:
+- `components/NuraAISection.js`
+- `pages/learner/NuraAI.js`
+- `pages/mentor/NuraAI.js`
+- `pages/admin/NuraAI.js`
+
+Once done, I’ll integrate with the backend or AI service later.

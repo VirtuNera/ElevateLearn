@@ -19,7 +19,9 @@ import {
   Code,
   TrendingUp,
   Microscope,
-  Palette
+  Palette,
+  Sparkles,
+  MessageCircle
 } from "lucide-react";
 
 type TabType = 'learning-hub' | 'active-courses' | 'completed' | 'credentials';
@@ -415,6 +417,58 @@ export default function LearnerDashboard() {
           )}
         </div>
       )}
+
+      {/* Nura AI Assistant Section */}
+      <div className="mt-12">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-on-surface mb-2">Nura AI Assistant</h2>
+            <p className="text-on-surface-variant">Get personalized insights and recommendations powered by AI</p>
+          </div>
+          <Button 
+            className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white"
+            onClick={() => window.location.href = '/nura-ai/learner'}
+          >
+            <Sparkles className="h-5 w-5 mr-2" />
+            Open Nura AI
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
+            <CardContent className="p-6 text-center">
+              <div className="bg-indigo-600 p-3 rounded-lg w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <Sparkles className="text-white text-2xl" />
+              </div>
+              <h3 className="font-semibold text-on-surface mb-2">AI Study Plan</h3>
+              <p className="text-on-surface-variant text-sm mb-4">Get personalized study schedules and goals</p>
+              <Button variant="outline" size="sm" className="w-full">Generate Plan</Button>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
+            <CardContent className="p-6 text-center">
+              <div className="bg-indigo-600 p-3 rounded-lg w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <TrendingUp className="text-white text-2xl" />
+              </div>
+              <h3 className="font-semibold text-on-surface mb-2">Performance Insights</h3>
+              <p className="text-on-surface-variant text-sm mb-4">AI-powered analysis of your learning progress</p>
+              <Button variant="outline" size="sm" className="w-full">View Report</Button>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
+            <CardContent className="p-6 text-center">
+              <div className="bg-indigo-600 p-3 rounded-lg w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <MessageCircle className="text-white text-2xl" />
+              </div>
+              <h3 className="font-semibold text-on-surface mb-2">Ask Nura</h3>
+              <p className="text-on-surface-variant text-sm mb-4">Get instant help and explanations</p>
+              <Button variant="outline" size="sm" className="w-full">Ask Question</Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
