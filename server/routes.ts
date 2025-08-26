@@ -11,11 +11,18 @@ import {
   insertMessageSchema,
   insertNotificationSchema
 } from "@shared/schema";
+import enhancedRoutes from "./routes/enhanced";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  const server = createServer(app);
+
   // Auth middleware
   await setupAuth(app);
 
+  // Apply enhanced routes with /api prefix
+  app.use('/api', enhancedRoutes);
+
+  // Legacy routes for backward compatibility
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
@@ -102,36 +109,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get assignments for mentor's courses  
-  app.get('/api/mentor/assignments', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const assignments = await storage.getAssignmentsByMentor(userId);
-      res.json(assignments);
-    } catch (error) {
-      console.error("Error fetching mentor assignments:", error);
-      res.status(500).json({ message: "Failed to fetch mentor assignments" });
-    }
-  });
-
-  // Get submissions for a specific assignment
-  app.get('/api/assignments/:id/submissions', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      
-      if (user?.role !== 'mentor' && user?.role !== 'admin') {
-        return res.status(403).json({ message: "Only mentors and admins can view submissions" });
-      }
-
-      const submissions = await storage.getSubmissionsByAssignment(req.params.id);
-      res.json(submissions);
-    } catch (error) {
-      console.error("Error fetching assignment submissions:", error);
-      res.status(500).json({ message: "Failed to fetch assignment submissions" });
-    }
-  });
-
   // Enrollment routes
   app.post('/api/enrollments', isAuthenticated, async (req: any, res) => {
     try {
@@ -145,34 +122,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(enrollment);
     } catch (error) {
       console.error("Error creating enrollment:", error);
-      res.status(500).json({ message: "Failed to enroll in course" });
+      res.status(500).json({ message: "Failed to create enrollment" });
     }
   });
 
-  app.get('/api/enrollments', isAuthenticated, async (req: any, res) => {
+  app.get('/api/users/:id/enrollments', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.params.id;
       const enrollments = await storage.getEnrollmentsByUser(userId);
       res.json(enrollments);
     } catch (error) {
       console.error("Error fetching enrollments:", error);
       res.status(500).json({ message: "Failed to fetch enrollments" });
-    }
-  });
-
-  app.put('/api/enrollments/:id/progress', isAuthenticated, async (req, res) => {
-    try {
-      const { progress } = req.body;
-      const enrollment = await storage.updateEnrollmentProgress(req.params.id, progress);
-      
-      if (!enrollment) {
-        return res.status(404).json({ message: "Enrollment not found" });
-      }
-      
-      res.json(enrollment);
-    } catch (error) {
-      console.error("Error updating enrollment progress:", error);
-      res.status(500).json({ message: "Failed to update progress" });
     }
   });
 
@@ -195,9 +156,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/courses/:courseId/assignments', isAuthenticated, async (req, res) => {
+  app.get('/api/courses/:id/assignments', async (req, res) => {
     try {
-      const assignments = await storage.getAssignmentsByCourse(req.params.courseId);
+      const assignments = await storage.getAssignmentsByCourse(req.params.id);
       res.json(assignments);
     } catch (error) {
       console.error("Error fetching assignments:", error);
@@ -205,16 +166,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Assignment submission routes
   app.post('/api/assignments/:id/submit', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      const assignmentId = req.params.id;
+      
       const submissionData = insertAssignmentSubmissionSchema.parse({
         ...req.body,
-        assignmentId: req.params.id,
+        assignmentId,
         userId,
       });
       
-      const submission = await storage.submitAssignment(submissionData);
+      const submission = await storage.createAssignmentSubmission(submissionData);
       res.status(201).json(submission);
     } catch (error) {
       console.error("Error submitting assignment:", error);
@@ -222,61 +186,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/submissions/:id/grade', isAuthenticated, async (req: any, res) => {
+  app.get('/api/assignments/:id/submissions', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
       if (user?.role !== 'mentor' && user?.role !== 'admin') {
-        return res.status(403).json({ message: "Only mentors and admins can grade assignments" });
+        return res.status(403).json({ message: "Access denied" });
       }
 
-      const { points, feedback } = req.body;
-      const submission = await storage.gradeAssignment(req.params.id, points, feedback);
-      
-      if (!submission) {
-        return res.status(404).json({ message: "Submission not found" });
-      }
-      
-      res.json(submission);
+      const submissions = await storage.getAssignmentSubmissions(req.params.id);
+      res.json(submissions);
     } catch (error) {
-      console.error("Error grading assignment:", error);
-      res.status(500).json({ message: "Failed to grade assignment" });
-    }
-  });
-
-  // Certification routes
-  app.get('/api/certifications', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const certifications = await storage.getCertificationsByUser(userId);
-      res.json(certifications);
-    } catch (error) {
-      console.error("Error fetching certifications:", error);
-      res.status(500).json({ message: "Failed to fetch certifications" });
+      console.error("Error fetching submissions:", error);
+      res.status(500).json({ message: "Failed to fetch submissions" });
     }
   });
 
   // Message routes
   app.post('/api/messages', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const senderId = req.user.claims.sub;
       const messageData = insertMessageSchema.parse({
         ...req.body,
-        senderId: userId,
+        senderId,
       });
       
       const message = await storage.createMessage(messageData);
       res.status(201).json(message);
     } catch (error) {
       console.error("Error creating message:", error);
-      res.status(500).json({ message: "Failed to send message" });
+      res.status(500).json({ message: "Failed to create message" });
     }
   });
 
-  app.get('/api/messages', isAuthenticated, async (req: any, res) => {
+  app.get('/api/users/:id/messages', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.params.id;
       const messages = await storage.getMessagesByUser(userId);
       res.json(messages);
     } catch (error) {
@@ -285,23 +231,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/messages/:id/read', isAuthenticated, async (req, res) => {
+  // Notification routes
+  app.post('/api/notifications', isAuthenticated, async (req: any, res) => {
     try {
-      const success = await storage.markMessageAsRead(req.params.id);
-      if (!success) {
-        return res.status(404).json({ message: "Message not found" });
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: "Only admins can create notifications" });
       }
-      res.json({ success: true });
+
+      const notificationData = insertNotificationSchema.parse({
+        ...req.body,
+        userId: req.body.userId || userId,
+      });
+      
+      const notification = await storage.createNotification(notificationData);
+      res.status(201).json(notification);
     } catch (error) {
-      console.error("Error marking message as read:", error);
-      res.status(500).json({ message: "Failed to mark message as read" });
+      console.error("Error creating notification:", error);
+      res.status(500).json({ message: "Failed to create notification" });
     }
   });
 
-  // Notification routes
-  app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
+  app.get('/api/users/:id/notifications', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.params.id;
       const notifications = await storage.getNotificationsByUser(userId);
       res.json(notifications);
     } catch (error) {
@@ -310,195 +265,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/notifications/:id/read', isAuthenticated, async (req, res) => {
+  // Mark notification as read
+  app.put('/api/notifications/:id/read', isAuthenticated, async (req: any, res) => {
     try {
-      const success = await storage.markNotificationAsRead(req.params.id);
-      if (!success) {
-        return res.status(404).json({ message: "Notification not found" });
-      }
-      res.json({ success: true });
+      const notificationId = req.params.id;
+      const userId = req.user.claims.sub;
+      
+      const notification = await storage.markNotificationAsRead(notificationId, userId);
+      res.json(notification);
     } catch (error) {
       console.error("Error marking notification as read:", error);
       res.status(500).json({ message: "Failed to mark notification as read" });
     }
   });
 
-  // Analytics routes (Admin only)
-  app.get('/api/analytics', isAuthenticated, async (req: any, res) => {
+  // Certification routes
+  app.post('/api/certifications', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
-      if (user?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
+      if (user?.role !== 'mentor' && user?.role !== 'admin') {
+        return res.status(403).json({ message: "Only mentors and admins can create certifications" });
       }
 
-      const [coursesCount, activeEnrollments, completedEnrollments, certificationsCount] = await Promise.all([
-        storage.getCoursesCount(),
-        storage.getActiveEnrollmentsCount(),
-        storage.getCompletedEnrollmentsCount(),
-        storage.getCertificationsCount(),
-      ]);
-
-      res.json({
-        coursesCount,
-        activeEnrollments,
-        completedEnrollments,
-        certificationsCount,
+      const certificationData = insertCertificationSchema.parse({
+        ...req.body,
+        userId: req.body.userId || userId,
       });
+      
+      const certification = await storage.createCertification(certificationData);
+      res.status(201).json(certification);
     } catch (error) {
-      console.error("Error fetching analytics:", error);
-      res.status(500).json({ message: "Failed to fetch analytics" });
+      console.error("Error creating certification:", error);
+      res.status(500).json({ message: "Failed to create certification" });
     }
   });
 
-  // Enhanced analytics for admin dashboard
-  app.get('/api/admin/analytics', isAuthenticated, async (req: any, res) => {
+  app.get('/api/users/:id/certifications', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.params.id;
+      const certifications = await storage.getCertificationsByUser(userId);
+      res.json(certifications);
+    } catch (error) {
+      console.error("Error fetching certifications:", error);
+      res.status(500).json({ message: "Failed to fetch certifications" });
+    }
+  });
+
+  // Dashboard routes
+  app.get('/api/dashboard/:role', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const role = req.params.role;
       
-      if (user?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
+      if (role === 'learner') {
+        const dashboard = await storage.getLearnerDashboard(userId);
+        res.json(dashboard);
+      } else if (role === 'mentor') {
+        const dashboard = await storage.getMentorDashboard(userId);
+        res.json(dashboard);
+      } else if (role === 'admin') {
+        const dashboard = await storage.getAdminDashboard(userId);
+        res.json(dashboard);
+      } else {
+        res.status(400).json({ message: "Invalid role" });
       }
-
-      const analyticsData = await storage.getAnalyticsData();
-      res.json(analyticsData);
     } catch (error) {
-      console.error("Error fetching enhanced analytics:", error);
-      res.status(500).json({ message: "Failed to fetch analytics data" });
+      console.error("Error fetching dashboard:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard" });
     }
   });
 
-  // Admin user management routes
-  app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      
-      if (user?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      const { role, search } = req.query;
-      const users = await storage.getAllUsers({
-        role: role as string,
-        search: search as string,
-      });
-      res.json(users);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-      res.status(500).json({ message: "Failed to fetch users" });
-    }
+  // Health check route
+  app.get('/api/health', (req, res) => {
+    res.json({ 
+      status: 'healthy', 
+      timestamp: new Date().toISOString(),
+      version: '2.0.0',
+      features: [
+        'Nura AI Integration',
+        'Quiz System',
+        'Tag Engine',
+        'Advanced Analytics',
+        'Study Plans',
+        'Organization Management'
+      ]
+    });
   });
 
-  app.put('/api/admin/users/:id/role', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      
-      if (user?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      const { role } = req.body;
-      const updatedUser = await storage.updateUserRole(req.params.id, role);
-      
-      if (!updatedUser) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      res.json(updatedUser);
-    } catch (error) {
-      console.error("Error updating user role:", error);
-      res.status(500).json({ message: "Failed to update user role" });
-    }
-  });
-
-  app.delete('/api/admin/users/:id', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      
-      if (user?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      const success = await storage.deleteUser(req.params.id);
-      
-      if (!success) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      res.status(500).json({ message: "Failed to delete user" });
-    }
-  });
-
-  // Admin course management routes
-  app.get('/api/admin/courses/pending', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      
-      if (user?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      const pendingCourses = await storage.getPendingCourses();
-      res.json(pendingCourses);
-    } catch (error) {
-      console.error("Error fetching pending courses:", error);
-      res.status(500).json({ message: "Failed to fetch pending courses" });
-    }
-  });
-
-  app.put('/api/admin/courses/:id/approve', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      
-      if (user?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      const approvedCourse = await storage.approveCourse(req.params.id);
-      
-      if (!approvedCourse) {
-        return res.status(404).json({ message: "Course not found" });
-      }
-      
-      res.json(approvedCourse);
-    } catch (error) {
-      console.error("Error approving course:", error);
-      res.status(500).json({ message: "Failed to approve course" });
-    }
-  });
-
-  app.delete('/api/admin/courses/:id/reject', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      
-      if (user?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      const success = await storage.rejectCourse(req.params.id);
-      
-      if (!success) {
-        return res.status(404).json({ message: "Course not found" });
-      }
-      
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error rejecting course:", error);
-      res.status(500).json({ message: "Failed to reject course" });
-    }
-  });
-
-  const httpServer = createServer(app);
-  return httpServer;
+  return server;
 }

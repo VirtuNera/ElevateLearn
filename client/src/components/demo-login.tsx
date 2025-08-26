@@ -35,10 +35,30 @@ export function DemoLogin({ isOpen, onClose }: DemoLoginProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  const { data: loginData } = useQuery<LoginResponse>({
-    queryKey: ["/api/login"],
+  // Debug logging for component lifecycle
+  console.log("DemoLogin component rendered, isOpen:", isOpen);
+  
+  const { data: loginData, error, isLoading } = useQuery<LoginResponse>({
+    queryKey: ["demo-login"],
+    queryFn: async () => {
+      console.log("Fetching demo users...");
+      try {
+        // Use the apiRequest function from queryClient with relative URL (will be proxied)
+        const response = await apiRequest("GET", "/api/login");
+        const data = await response.json();
+        console.log("Demo users fetched:", data);
+        return data;
+      } catch (fetchError) {
+        console.error("Fetch error details:", fetchError);
+        throw fetchError;
+      }
+    },
     enabled: isOpen,
+    retry: false,
   });
+
+  // Debug logging
+  console.log("DemoLogin component state:", { isOpen, loginData, error, isLoading });
 
   const loginMutation = useMutation({
     mutationFn: async (userId: string) => {
@@ -48,6 +68,7 @@ export function DemoLogin({ isOpen, onClose }: DemoLoginProps) {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
       });
       
       if (!response.ok) {
@@ -110,6 +131,18 @@ export function DemoLogin({ isOpen, onClose }: DemoLoginProps) {
         </DialogHeader>
         
         <div className="space-y-3">
+          {isLoading && (
+            <div className="text-center py-4">
+              <p>Loading demo users...</p>
+            </div>
+          )}
+          
+          {error && (
+            <div className="text-center py-4 text-red-600">
+              <p>Error loading demo users: {error.message}</p>
+            </div>
+          )}
+          
           {loginData?.users?.map((user: DemoUser) => (
             <Card
               key={user.id}
@@ -129,11 +162,16 @@ export function DemoLogin({ isOpen, onClose }: DemoLoginProps) {
               </CardHeader>
               <CardContent className="pt-0">
                 <CardDescription className="text-xs">
-                  {user.email}
-                </CardDescription>
+                  {user.email}</CardDescription>
               </CardContent>
             </Card>
           ))}
+          
+          {loginData?.users && loginData.users.length === 0 && (
+            <div className="text-center py-4 text-gray-500">
+              <p>No demo users available</p>
+            </div>
+          )}
         </div>
 
         <div className="mt-4 text-center">

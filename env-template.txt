@@ -1,0 +1,155 @@
+# =============================================================================
+# Elevate360 LMS - Environment Configuration Template
+# =============================================================================
+# Copy this content to a new file named .env and fill in your actual values
+# 
+# IMPORTANT: Never commit your actual .env file to version control!
+# Add .env to your .gitignore file
+
+# =============================================================================
+# SERVER CONFIGURATION
+# =============================================================================
+HOST=127.0.0.1
+PORT=5000
+NODE_ENV=development
+
+# =============================================================================
+# DATABASE CONFIGURATION (PostgreSQL - Neon)
+# =============================================================================
+DATABASE_URL=postgres://neon:npg@localhost:5432/neondb
+DATABASE_SSL=true
+DATABASE_MAX_CONNECTIONS=10
+DATABASE_IDLE_TIMEOUT=30000
+
+# =============================================================================
+# AUTHENTICATION & SECURITY
+# =============================================================================
+JWT_SECRET=sxon411
+JWT_EXPIRES_IN=24h
+BCRYPT_ROUNDS=12
+SESSION_SECRET=your-session-secret-key-change-in-production
+
+# =============================================================================
+# AI SERVICES CONFIGURATION
+# =============================================================================
+GOOGLE_API_KEY=your-google-api-key-here
+GOOGLE_API_URL=https://generativelanguage.googleapis.com/v1
+OLLAMA_URL=http://localhost:11434
+AI_DEFAULT_MODEL=gemini-1.5-flash
+AI_MAX_TOKENS=1000
+AI_TEMPERATURE=0.7
+
+# =============================================================================
+# RATE LIMITING
+# =============================================================================
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+RATE_LIMIT_SKIP_SUCCESSFUL=false
+RATE_LIMIT_SKIP_FAILED=false
+
+# =============================================================================
+# FILE UPLOAD CONFIGURATION
+# =============================================================================
+MAX_FILE_SIZE=10485760
+ALLOWED_FILE_TYPES=image/jpeg,image/png,image/gif,application/pdf,text/plain
+UPLOAD_DIR=./uploads
+
+# =============================================================================
+# EMAIL CONFIGURATION (Optional)
+# =============================================================================
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_SECURE=false
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
+
+# =============================================================================
+# REDIS CONFIGURATION (Optional - for caching/sessions)
+# =============================================================================
+REDIS_URL=redis://localhost:6379
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+REDIS_DB=0
+
+# =============================================================================
+# LOGGING CONFIGURATION
+# =============================================================================
+LOG_LEVEL=info
+LOG_FORMAT=combined
+LOG_ENABLE_CONSOLE=true
+LOG_ENABLE_FILE=false
+LOG_FILE=./logs/app.log
+
+# =============================================================================
+# SECURITY & CORS
+# =============================================================================
+CORS_ORIGIN=http://localhost:3000,http://localhost:5173
+ENABLE_CORS=true
+ENABLE_HELMET=true
+ENABLE_RATE_LIMIT=true
+ENABLE_COMPRESSION=true
+
+# =============================================================================
+# FEATURE FLAGS
+# =============================================================================
+ENABLE_AI=true
+ENABLE_QUIZZES=true
+ENABLE_TAGS=true
+ENABLE_ANALYTICS=true
+ENABLE_STUDY_PLANS=true
+ENABLE_ORGANIZATIONS=true
+
+# =============================================================================
+# ORGANIZATION SETTINGS
+# =============================================================================
+DEFAULT_ORG_TYPE=university
+MAX_ORG_USERS=1000
+MAX_ORG_COURSES=100
+
+# =============================================================================
+# QUIZ SYSTEM SETTINGS
+# =============================================================================
+DEFAULT_QUIZ_TIME_LIMIT=30
+DEFAULT_QUIZ_PASSING_SCORE=70
+MAX_QUIZ_ATTEMPTS=3
+ENABLE_QUIZ_RANDOMIZATION=true
+
+# =============================================================================
+# ANALYTICS SETTINGS
+# =============================================================================
+ANALYTICS_RETENTION_DAYS=365
+ENABLE_REALTIME_ANALYTICS=false
+ANALYTICS_BATCH_SIZE=1000
+
+# =============================================================================
+# TAG ENGINE SETTINGS
+# =============================================================================
+MAX_TAGS_PER_COURSE=10
+MIN_TAG_CONFIDENCE=0.6
+ENABLE_AI_TAGGING=true
+PREDEFINED_TAGS=javascript,typescript,react,nodejs,python,java,aws,docker,kubernetes
+
+# =============================================================================
+# STUDY PLANS SETTINGS
+# =============================================================================
+MAX_STUDY_PLANS_PER_USER=5
+DEFAULT_STUDY_TIME=10
+ENABLE_AI_STUDY_PLANS=true
+
+# =============================================================================
+# TESTING CONFIGURATION
+# =============================================================================
+TEST_DATABASE_URL=postgresql://test:test@localhost:5432/test
+
+# =============================================================================
+# SETUP INSTRUCTIONS
+# =============================================================================
+# 1. Copy this content to a new file named .env
+# 2. Fill in your actual values for each variable
+# 3. For DATABASE_URL: Get this from your Neon dashboard
+# 4. For JWT_SECRET: Generate a strong random string for production
+# 5. For GOOGLE_API_KEY: Get from Google AI Studio dashboard (optional for development)
+# 6. For CORS_ORIGIN: Add your frontend URLs
+# 7. For production, set NODE_ENV=production and use strong secrets
+# 8. Add .env to your .gitignore file to keep secrets safe
