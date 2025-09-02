@@ -210,7 +210,7 @@ export default function EditCoursePage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Course Type</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value || undefined}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select course type" />
@@ -260,7 +260,7 @@ export default function EditCoursePage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Difficulty Level</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value || undefined}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select difficulty" />

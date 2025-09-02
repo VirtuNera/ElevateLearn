@@ -40,7 +40,7 @@ export default function Dashboard() {
   }
 
   const renderDashboard = () => {
-    switch (user.role) {
+    switch ((user as any).role) {
       case 'learner':
         return <LearnerDashboard />;
       case 'mentor':

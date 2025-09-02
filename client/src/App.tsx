@@ -10,6 +10,9 @@ import NotFound from "@/pages/not-found";
 import LearnerNuraAI from "@/components/learner-nura-ai";
 import MentorNuraAI from "@/components/mentor-nura-ai";
 import AdminNuraAI from "@/components/admin-nura-ai";
+import CoursePage from "@/pages/course";
+import CreateCoursePage from "@/pages/create-course";
+import EditCoursePage from "@/pages/edit-course";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -24,6 +27,9 @@ function Router() {
           <Route path="/nura-ai/learner" component={LearnerNuraAI} />
           <Route path="/nura-ai/mentor" component={MentorNuraAI} />
           <Route path="/nura-ai/admin" component={AdminNuraAI} />
+          <Route path="/course/:id" component={CoursePage} />
+          <Route path="/create-course" component={CreateCoursePage} />
+          <Route path="/edit-course/:id" component={EditCoursePage} />
         </>
       )}
       <Route component={NotFound} />

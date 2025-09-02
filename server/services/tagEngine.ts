@@ -110,7 +110,7 @@ export class TagEngine {
   private findKeywordMatches(text: string): TagSuggestion[] {
     const matches: TagSuggestion[] = [];
 
-    for (const [key, tag] of this.predefinedTags) {
+    for (const [key, tag] of this.predefinedTags.entries()) {
       if (text.includes(key)) {
         matches.push({
           name: tag.name,
@@ -126,7 +126,7 @@ export class TagEngine {
     const words = text.split(/\s+/);
     for (const word of words) {
       if (word.length > 3) {
-        for (const [key, tag] of this.predefinedTags) {
+        for (const [key, tag] of this.predefinedTags.entries()) {
           if (key.includes(word) || word.includes(key)) {
             matches.push({
               name: tag.name,
@@ -264,9 +264,9 @@ Problem Solving|skill|0.7|Analytical and problem-solving skills`;
 
     if (existingTag.length > 0) {
       // Update confidence if higher
-      if (confidence > existingTag[0].confidence) {
+      if (confidence > parseFloat(existingTag[0]?.confidence || '0')) {
         await db.update(courseTags)
-          .set({ confidence })
+          .set({ confidence: confidence.toString() })
           .where(and(eq(courseTags.courseId, courseId), eq(courseTags.tagId, tagId)));
       }
       return existingTag[0];
@@ -276,7 +276,7 @@ Problem Solving|skill|0.7|Analytical and problem-solving skills`;
     const courseTag = await db.insert(courseTags).values({
       courseId,
       tagId,
-      confidence,
+      confidence: confidence.toString(),
     }).returning();
 
     return courseTag[0];
@@ -295,19 +295,21 @@ Problem Solving|skill|0.7|Analytical and problem-solving skills`;
   // Get all tags with optional filtering
   async getTags(category?: string, search?: string): Promise<any[]> {
     try {
-      let query = db.select().from(tags);
+      let whereConditions = [];
 
       if (category) {
-        query = query.where(eq(tags.category, category));
+        whereConditions.push(eq(tags.category, category));
       }
 
       if (search) {
         // Simple search - in production, consider using full-text search
-        query = query.where(eq(tags.name, search));
+        whereConditions.push(eq(tags.name, search));
       }
 
-      const tags = await query.orderBy(tags.name);
-      return tags;
+      const result = await db.select().from(tags)
+        .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+        .orderBy(tags.name);
+      return result;
     } catch (error) {
       console.error('Error fetching tags:', error);
       throw error;
@@ -317,7 +319,7 @@ Problem Solving|skill|0.7|Analytical and problem-solving skills`;
   // Get tags for a specific course
   async getCourseTags(courseId: string): Promise<any[]> {
     try {
-      const courseTags = await db.select({
+      const result = await db.select({
         id: courseTags.id,
         name: tags.name,
         category: tags.category,
@@ -330,7 +332,7 @@ Problem Solving|skill|0.7|Analytical and problem-solving skills`;
       .where(eq(courseTags.courseId, courseId))
       .orderBy(courseTags.confidence);
 
-      return courseTags;
+      return result;
     } catch (error) {
       console.error('Error fetching course tags:', error);
       throw error;

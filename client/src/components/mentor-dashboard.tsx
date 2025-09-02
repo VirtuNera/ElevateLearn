@@ -49,20 +49,20 @@ export default function MentorDashboard() {
   const [activeView, setActiveView] = useState<'overview' | 'courses' | 'students' | 'assignments'>('overview');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { data: mentorCourses = [], isLoading: coursesLoading } = useQuery({
+  const { data: mentorCourses = [], isLoading: coursesLoading } = useQuery<any[]>({
     queryKey: ['/api/mentor/courses'],
   });
 
-  const { data: mentorStudents = [], isLoading: studentsLoading } = useQuery({
+  const { data: mentorStudents = [], isLoading: studentsLoading } = useQuery<any[]>({
     queryKey: ['/api/mentor/students'],
   });
 
-  const { data: mentorAssignments = [], isLoading: assignmentsLoading } = useQuery({
+  const { data: mentorAssignments = [], isLoading: assignmentsLoading } = useQuery<any[]>({
     queryKey: ['/api/mentor/assignments'],
   });
 
-  const totalStudents = mentorCourses.reduce((sum, course) => sum + (course.enrolledCount || 0), 0);
-  const activeCourses = mentorCourses.filter(course => course.isActive).length;
+  const totalStudents = mentorCourses.reduce((sum: number, course: any) => sum + (course.enrolledCount || 0), 0);
+  const activeCourses = mentorCourses.filter((course: any) => course.isActive).length;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -72,7 +72,10 @@ export default function MentorDashboard() {
           <h1 className="text-3xl font-bold text-on-surface mb-2">Mentor Dashboard</h1>
           <p className="text-on-surface-variant">Manage your courses, students, and teaching materials.</p>
         </div>
-        <Button className="flex items-center space-x-2">
+        <Button 
+          className="flex items-center space-x-2"
+          onClick={() => window.location.href = '/create-course'}
+        >
           <Plus className="h-4 w-4" />
           <span>Create Course</span>
         </Button>
@@ -207,7 +210,11 @@ export default function MentorDashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Button variant="outline" className="h-20 flex flex-col items-center space-y-2">
+                <Button 
+                  variant="outline" 
+                  className="h-20 flex flex-col items-center space-y-2"
+                  onClick={() => window.location.href = '/create-course'}
+                >
                   <Plus className="h-5 w-5" />
                   <span className="text-sm">Create Course</span>
                 </Button>
@@ -254,7 +261,7 @@ export default function MentorDashboard() {
                 <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-on-surface mb-2">No courses yet</h3>
                 <p className="text-on-surface-variant mb-4">Create your first course to start teaching</p>
-                <Button>Create Course</Button>
+                <Button onClick={() => window.location.href = '/create-course'}>Create Course</Button>
               </CardContent>
             </Card>
           ) : (
@@ -286,8 +293,19 @@ export default function MentorDashboard() {
                         </div>
                       </div>
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">Edit</Button>
-                        <Button size="sm">View Details</Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => window.location.href = `/edit-course/${course.id}`}
+                        >
+                          Edit
+                        </Button>
+                        <Button 
+                          size="sm"
+                          onClick={() => window.location.href = `/course/${course.id}`}
+                        >
+                          View Details
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -347,7 +365,9 @@ export default function MentorDashboard() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Active</p>
-                    <p className="text-xl font-bold">{mentorStudents.filter(s => s.enrollments.some(e => e.status === 'active')).length}</p>
+                    <p className="text-xl font-bold">
+                      {mentorStudents.filter(s => s.enrollments.some((e: any) => e.status === 'active')).length}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -360,7 +380,7 @@ export default function MentorDashboard() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">In Progress</p>
-                    <p className="text-xl font-bold">{mentorStudents.filter(s => s.enrollments.some(e => e.progress > 0 && e.progress < 100)).length}</p>
+                    <p className="text-xl font-bold">{mentorStudents.filter(s => s.enrollments.some((e: any) => e.progress > 0 && e.progress < 100)).length}</p>
                   </div>
                 </div>
               </CardContent>
@@ -373,7 +393,7 @@ export default function MentorDashboard() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Completed</p>
-                    <p className="text-xl font-bold">{mentorStudents.filter(s => s.enrollments.some(e => e.status === 'completed')).length}</p>
+                    <p className="text-xl font-bold">{mentorStudents.filter(s => s.enrollments.some((e: any) => e.status === 'completed')).length}</p>
                   </div>
                 </div>
               </CardContent>
@@ -426,9 +446,9 @@ export default function MentorDashboard() {
                       )
                       .map((student) => {
                         const avgProgress = student.enrollments.length > 0 
-                          ? student.enrollments.reduce((sum, e) => sum + (e.progress || 0), 0) / student.enrollments.length
+                          ? student.enrollments.reduce((sum: any, e: any) => sum + (e.progress || 0), 0) / student.enrollments.length
                           : 0;
-                        const hasActiveEnrollments = student.enrollments.some(e => e.status === 'active');
+                        const hasActiveEnrollments = student.enrollments.some((e: any) => e.status === 'active');
                         
                         return (
                           <TableRow key={student.id}>
@@ -448,7 +468,7 @@ export default function MentorDashboard() {
                             </TableCell>
                             <TableCell>
                               <div className="space-y-1">
-                                {student.enrollments.map((enrollment) => (
+                                {student.enrollments.map((enrollment: any) => (
                                   <Badge key={enrollment.id} variant="outline" className="text-xs">
                                     {enrollment.course.title}
                                   </Badge>
@@ -557,7 +577,7 @@ export default function MentorDashboard() {
                   <div>
                     <p className="text-sm text-muted-foreground">Pending Review</p>
                     <p className="text-xl font-bold">
-                      {mentorAssignments.reduce((sum, a) => sum + a.submissions.filter(s => s.status === 'submitted').length, 0)}
+                      {mentorAssignments.reduce((sum: any, a) => sum + a.submissions.filter((s: any) => s.status === 'submitted').length, 0)}
                     </p>
                   </div>
                 </div>
@@ -572,7 +592,7 @@ export default function MentorDashboard() {
                   <div>
                     <p className="text-sm text-muted-foreground">Graded</p>
                     <p className="text-xl font-bold">
-                      {mentorAssignments.reduce((sum, a) => sum + a.submissions.filter(s => s.status === 'graded').length, 0)}
+                      {mentorAssignments.reduce((sum: any, a) => sum + a.submissions.filter((s: any) => s.status === 'graded').length, 0)}
                     </p>
                   </div>
                 </div>
@@ -589,8 +609,8 @@ export default function MentorDashboard() {
                     <p className="text-xl font-bold">
                       {mentorAssignments.length > 0 ? Math.round(
                         mentorAssignments
-                          .flatMap(a => a.submissions.filter(s => s.points !== null))
-                          .reduce((sum, s, _, arr) => sum + (s.points || 0) / arr.length, 0)
+                          .flatMap(a => a.submissions.filter((s: any) => s.points !== null))
+                          .reduce((sum: any, s: any, _, arr) => sum + (s.points || 0) / arr.length, 0)
                       ) : 0}%
                     </p>
                   </div>
@@ -603,7 +623,7 @@ export default function MentorDashboard() {
           <Tabs defaultValue="assignments" className="w-full">
             <TabsList>
               <TabsTrigger value="assignments">All Assignments</TabsTrigger>
-              <TabsTrigger value="pending">Pending Review ({mentorAssignments.reduce((sum, a) => sum + a.submissions.filter(s => s.status === 'submitted').length, 0)})</TabsTrigger>
+              <TabsTrigger value="pending">Pending Review ({mentorAssignments.reduce((sum: any, a) => sum + a.submissions.filter((s: any) => s.status === 'submitted').length, 0)})</TabsTrigger>
               <TabsTrigger value="graded">Recently Graded</TabsTrigger>
             </TabsList>
 
@@ -648,12 +668,12 @@ export default function MentorDashboard() {
                         )
                         .map((assignment) => {
                           const submissionCount = assignment.submissions.length;
-                          const gradedCount = assignment.submissions.filter(s => s.status === 'graded').length;
-                          const pendingCount = assignment.submissions.filter(s => s.status === 'submitted').length;
+                          const gradedCount = assignment.submissions.filter((s: any) => s.status === 'graded').length;
+                          const pendingCount = assignment.submissions.filter((s: any) => s.status === 'submitted').length;
                           const avgScore = gradedCount > 0 
                             ? assignment.submissions
-                                .filter(s => s.points !== null)
-                                .reduce((sum, s) => sum + (s.points || 0), 0) / gradedCount
+                                .filter((s: any) => s.points !== null)
+                                .reduce((sum: any, s: any) => sum + (s.points || 0), 0) / gradedCount
                             : 0;
 
                           return (
@@ -744,14 +764,14 @@ export default function MentorDashboard() {
                 <CardContent>
                   {(() => {
                     const pendingSubmissions = mentorAssignments
-                      .flatMap(assignment => 
-                        assignment.submissions
-                          .filter(s => s.status === 'submitted')
-                          .map(submission => ({
-                            ...submission,
-                            assignment: assignment
-                          }))
-                      )
+                                              .flatMap(assignment => 
+                          assignment.submissions
+                            .filter((s: any) => s.status === 'submitted')
+                            .map((submission: any) => ({
+                              ...submission,
+                              assignment: assignment
+                            }))
+                          )
                       .sort((a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
 
                     return pendingSubmissions.length === 0 ? (
@@ -811,14 +831,14 @@ export default function MentorDashboard() {
                 <CardContent>
                   {(() => {
                     const gradedSubmissions = mentorAssignments
-                      .flatMap(assignment => 
-                        assignment.submissions
-                          .filter(s => s.status === 'graded')
-                          .map(submission => ({
-                            ...submission,
-                            assignment: assignment
-                          }))
-                      )
+                                              .flatMap(assignment => 
+                          assignment.submissions
+                            .filter((s: any) => s.status === 'graded')
+                            .map((submission: any) => ({
+                              ...submission,
+                              assignment: assignment
+                            }))
+                          )
                       .sort((a, b) => new Date(b.gradedAt || 0).getTime() - new Date(a.gradedAt || 0).getTime())
                       .slice(0, 10); // Show only recent 10
 

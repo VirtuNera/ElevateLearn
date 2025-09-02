@@ -58,7 +58,7 @@ export class AIService {
       // Calculate performance metrics
       const totalCourses = userEnrollments.length;
       const completedCourses = userEnrollments.filter(e => e.status === 'completed').length;
-      const averageProgress = userEnrollments.reduce((sum, e) => sum + e.progress, 0) / totalCourses || 0;
+      const averageProgress = userEnrollments.reduce((sum, e) => sum + (e.progress || 0), 0) / totalCourses || 0;
       const averageScore = userSubmissions.reduce((sum, s) => sum + (s.points || 0), 0) / userSubmissions.length || 0;
 
       // Generate AI insights
@@ -86,7 +86,7 @@ export class AIService {
         content: aiResponse,
         insights: this.extractInsights(aiResponse),
         recommendations: this.extractRecommendations(aiResponse),
-        confidence: 0.85,
+        confidence: '0.85',
         metadata: {
           metrics: {
             totalCourses,
@@ -118,7 +118,7 @@ export class AIService {
       const totalEnrollments = courseEnrollments.length;
       const activeEnrollments = courseEnrollments.filter(e => e.status === 'active').length;
       const completedEnrollments = courseEnrollments.filter(e => e.status === 'completed').length;
-      const averageProgress = courseEnrollments.reduce((sum, e) => sum + e.progress, 0) / totalEnrollments || 0;
+      const averageProgress = courseEnrollments.reduce((sum, e) => sum + (e.progress || 0), 0) / totalEnrollments || 0;
 
       const prompt = this.buildCourseReportPrompt({
         course: course[0],
@@ -141,7 +141,7 @@ export class AIService {
         content: aiResponse,
         insights: this.extractInsights(aiResponse),
         recommendations: this.extractRecommendations(aiResponse),
-        confidence: 0.80,
+        confidence: '0.80',
         metadata: {
           metrics: {
             totalEnrollments,
@@ -246,7 +246,7 @@ export class AIService {
         content: aiResponse,
         insights: this.extractInsights(aiResponse),
         recommendations: this.extractRecommendations(aiResponse),
-        confidence: 0.75,
+        confidence: '0.75',
         metadata: {
           metrics: {
             totalUsers: totalUsers[0].count,

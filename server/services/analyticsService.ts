@@ -222,7 +222,7 @@ export class AnalyticsService {
       const trends: TrendData[] = [];
 
       // Generate date periods
-      const periods = this.generateDatePeriods(filters.startDate, filters.endDate, period);
+      const periods = this.generateDatePeriods(period, filters.startDate, filters.endDate);
 
       for (const periodData of periods) {
         const periodFilters = {
@@ -398,7 +398,7 @@ export class AnalyticsService {
     return conditions.length > 0 ? conditions : undefined;
   }
 
-  private generateDatePeriods(startDate?: Date, endDate?: Date, period: string) {
+  private generateDatePeriods(period: string, startDate?: Date, endDate?: Date) {
     const periods = [];
     const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
     const end = endDate || new Date();
@@ -481,13 +481,13 @@ export class AnalyticsService {
 
   private async getAverageProgress(whereConditions: any): Promise<number> {
     const result = await db.select({ avg: sql`AVG(${enrollments.progress})` }).from(enrollments);
-    return result[0].avg || 0;
+    return (result[0].avg as number) || 0;
   }
 
   private async getAverageScore(whereConditions: any): Promise<number> {
     const result = await db.select({ avg: sql`AVG(${assignmentSubmissions.points})` })
       .from(assignmentSubmissions);
-    return result[0].avg || 0;
+    return (result[0].avg as number) || 0;
   }
 
   private async getActiveUsers(filters: AnalyticsFilters): Promise<number> {
@@ -524,7 +524,7 @@ export class AnalyticsService {
     const result = await db.select({ avg: sql`AVG(${enrollments.progress})` })
       .from(enrollments)
       .where(eq(enrollments.courseId, courseId));
-    return result[0].avg || 0;
+    return (result[0].avg as number) || 0;
   }
 
   private async getCourseAverageScore(courseId: string): Promise<number> {
@@ -532,7 +532,7 @@ export class AnalyticsService {
       .from(assignmentSubmissions)
       .innerJoin(assignments, eq(assignmentSubmissions.assignmentId, assignments.id))
       .where(eq(assignments.courseId, courseId));
-    return result[0].avg || 0;
+    return (result[0].avg as number) || 0;
   }
 
   private async getCourseTimeToComplete(courseId: string): Promise<number> {
@@ -544,7 +544,7 @@ export class AnalyticsService {
       eq(enrollments.courseId, courseId),
       eq(enrollments.status, 'completed')
     ));
-    return result[0].avg || 0;
+    return (result[0].avg as number) || 0;
   }
 
   // User-specific metrics
@@ -569,21 +569,21 @@ export class AnalyticsService {
     const result = await db.select({ avg: sql`AVG(${enrollments.progress})` })
       .from(enrollments)
       .where(eq(enrollments.userId, userId));
-    return result[0].avg || 0;
+    return (result[0].avg as number) || 0;
   }
 
   private async getUserAverageScore(userId: string): Promise<number> {
     const result = await db.select({ avg: sql`AVG(${assignmentSubmissions.points})` })
       .from(assignmentSubmissions)
       .where(eq(assignmentSubmissions.userId, userId));
-    return result[0].avg || 0;
+    return (result[0].avg as number) || 0;
   }
 
   private async getUserTimeSpent(userId: string): Promise<number> {
     const result = await db.select({ sum: sql`SUM(${enrollments.timeSpent})` })
       .from(enrollments)
       .where(eq(enrollments.userId, userId));
-    return (result[0].sum || 0) / 60; // Convert minutes to hours
+    return ((result[0].sum as number) || 0) / 60; // Convert minutes to hours
   }
 
   private async getUserCertifications(userId: string): Promise<number> {

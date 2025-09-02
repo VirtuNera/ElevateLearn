@@ -1,5 +1,5 @@
-import { Router } from 'express';
-import { authMiddleware, roleMiddleware, organizationMiddleware, AuthenticatedRequest } from '../middleware/auth';
+import { Router, Request, Response } from 'express';
+import { authMiddleware, roleMiddleware, AuthenticatedRequest } from '../middleware/auth';
 import { rateLimit } from '../middleware/rateLimit';
 import { asyncHandler } from '../middleware/errorHandler';
 import { aiService } from '../services/aiService';
@@ -7,19 +7,23 @@ import { tagEngine } from '../services/tagEngine';
 import { quizService } from '../services/quizService';
 import { analyticsService } from '../services/analyticsService';
 import { db } from '../db';
-import { 
-  courses, 
-  users, 
+import {
+  courses,
+  users,
   organizations,
   tags,
   nuraReports,
   studyPlans
 } from '@shared/schema';
-import { eq, and, desc, count } from 'drizzle-orm';
-import { sql } from 'drizzle-orm';
+import { desc, sql } from 'drizzle-orm';
 import { enrollments } from '@shared/schema';
 
 const router = Router();
+
+// Local helpers to build SQL conditions without relying on specific drizzle helper exports
+const eq = (left: any, right: any) => sql`${left} = ${right}`;
+const and = (...conditions: any[]) =>
+  conditions.reduce((acc: any, curr: any) => (acc ? sql`${acc} and ${curr}` : curr), undefined as any);
 
 // Apply rate limiting to all routes
 router.use(rateLimit(100, 15 * 60 * 1000)); // 100 requests per 15 minutes
@@ -27,9 +31,9 @@ router.use(rateLimit(100, 15 * 60 * 1000)); // 100 requests per 15 minutes
 // ==================== NURA AI ROUTES ====================
 
 // Generate learner performance report
-router.post('/nura/learner-report', 
-  authMiddleware, 
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+router.post('/nura/learner-report',
+  authMiddleware,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { userId } = req.body;
     
     if (!req.user || (req.user.role !== 'admin' && req.user.id !== userId)) {
@@ -42,10 +46,10 @@ router.post('/nura/learner-report',
 );
 
 // Generate course analysis report
-router.post('/nura/course-report', 
-  authMiddleware, 
+router.post('/nura/course-report',
+  authMiddleware,
   roleMiddleware(['mentor', 'admin']),
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { courseId } = req.body;
     
     const report = await aiService.generateCourseReport(courseId);
@@ -54,19 +58,19 @@ router.post('/nura/course-report',
 );
 
 // Generate system-wide report
-router.post('/nura/system-report', 
-  authMiddleware, 
+router.post('/nura/system-report',
+  authMiddleware,
   roleMiddleware(['admin']),
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const report = await aiService.generateSystemReport();
     res.json(report);
   })
 );
 
 // Generate personalized study plan
-router.post('/nura/study-plan', 
-  authMiddleware, 
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+router.post('/nura/study-plan',
+  authMiddleware,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { goals, timeAvailable, preferences } = req.body;
     
     const studyPlan = await aiService.generateStudyPlan({
@@ -81,12 +85,12 @@ router.post('/nura/study-plan',
 );
 
 // Get AI-generated reports
-router.get('/nura/reports', 
-  authMiddleware, 
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+router.get('/nura/reports',
+  authMiddleware,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { type, targetId } = req.query;
     
-    let whereConditions = [];
+    const whereConditions = [] as any[];
     
     if (type) {
       whereConditions.push(eq(nuraReports.type, type as any));
@@ -101,10 +105,11 @@ router.get('/nura/reports',
       whereConditions.push(eq(nuraReports.targetId, req.user!.id));
     }
     
-    const reports = await db.select()
-      .from(nuraReports)
-      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
-      .orderBy(desc(nuraReports.createdAt));
+    const baseQuery = db.select().from(nuraReports);
+    const conditionedQuery = whereConditions.length > 0
+      ? baseQuery.where(and(...whereConditions))
+      : baseQuery;
+    const reports = await conditionedQuery.orderBy(desc(nuraReports.createdAt));
     
     res.json(reports);
   })
@@ -113,38 +118,38 @@ router.get('/nura/reports',
 // ==================== TAG ENGINE ROUTES ====================
 
 // Get all tags
-router.get('/tags', asyncHandler(async (req, res) => {
+router.get('/tags', asyncHandler(async (req: Request, res: Response) => {
   const { category, search } = req.query;
   
-  const tags = await tagEngine.getTags(
+  const tagList = await tagEngine.getTags(
     category as string, 
     search as string
   );
   
-  res.json(tags);
+  res.json(tagList);
 }));
 
 // Get popular tags
-router.get('/tags/popular', asyncHandler(async (req, res) => {
+router.get('/tags/popular', asyncHandler(async (req: Request, res: Response) => {
   const { limit } = req.query;
   
-  const tags = await tagEngine.getPopularTags(parseInt(limit as string) || 10);
-  res.json(tags);
+  const popularTags = await tagEngine.getPopularTags(parseInt(limit as string) || 10);
+  res.json(popularTags);
 }));
 
 // Get course tags
-router.get('/courses/:courseId/tags', asyncHandler(async (req, res) => {
+router.get('/courses/:courseId/tags', asyncHandler(async (req: Request, res: Response) => {
   const { courseId } = req.params;
   
-  const tags = await tagEngine.getCourseTags(courseId);
-  res.json(tags);
+  const courseTagList = await tagEngine.getCourseTags(courseId);
+  res.json(courseTagList);
 }));
 
 // Auto-tag a course
-router.post('/courses/:courseId/auto-tag', 
-  authMiddleware, 
+router.post('/courses/:courseId/auto-tag',
+  authMiddleware,
   roleMiddleware(['mentor', 'admin']),
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { courseId } = req.params;
     const { manualTags } = req.body;
     
@@ -157,7 +162,7 @@ router.post('/courses/:courseId/auto-tag',
     const appliedTags = await tagEngine.autoTagCourse({
       courseId,
       title: course[0].title,
-      description: course[0].description,
+      description: course[0].description || undefined,
       manualTags,
     });
     
@@ -166,7 +171,7 @@ router.post('/courses/:courseId/auto-tag',
 );
 
 // Suggest tags for a course
-router.post('/tags/suggest', asyncHandler(async (req, res) => {
+router.post('/tags/suggest', asyncHandler(async (req: Request, res: Response) => {
   const { title, description } = req.body;
   
   const suggestions = await tagEngine.suggestTagsForCourse(title, description);
@@ -174,28 +179,33 @@ router.post('/tags/suggest', asyncHandler(async (req, res) => {
 }));
 
 // Create a new tag
-router.post('/tags', 
-  authMiddleware, 
+router.post('/tags',
+  authMiddleware,
   roleMiddleware(['admin']),
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { name, category, description, color } = req.body;
-    
-    const tag = await db.insert(tags).values({
-      name,
-      category,
-      description,
-      color,
-    }).returning();
-    
-    res.status(201).json(tag[0]);
+    try {
+      const tag = await db.insert(tags).values({
+        name,
+        category,
+        description,
+        color,
+      }).returning();
+      res.status(201).json(tag[0]);
+    } catch (err: any) {
+      if (err?.code === '23505') {
+        return res.status(409).json({ message: 'Tag name already exists' });
+      }
+      throw err;
+    }
   })
 );
 
 // Update a tag
-router.put('/tags/:tagId', 
-  authMiddleware, 
+router.put('/tags/:tagId',
+  authMiddleware,
   roleMiddleware(['admin']),
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { tagId } = req.params;
     const updates = req.body;
     
@@ -205,10 +215,10 @@ router.put('/tags/:tagId',
 );
 
 // Delete a tag
-router.delete('/tags/:tagId', 
-  authMiddleware, 
+router.delete('/tags/:tagId',
+  authMiddleware,
   roleMiddleware(['admin']),
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { tagId } = req.params;
     
     await tagEngine.deleteTag(tagId);
@@ -219,10 +229,10 @@ router.delete('/tags/:tagId',
 // ==================== QUIZ SYSTEM ROUTES ====================
 
 // Create a new quiz
-router.post('/quizzes', 
-  authMiddleware, 
+router.post('/quizzes',
+  authMiddleware,
   roleMiddleware(['mentor', 'admin']),
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const quizData = req.body;
     
     const quiz = await quizService.createQuiz(quizData);
@@ -231,9 +241,9 @@ router.post('/quizzes',
 );
 
 // Get quiz (without answers for students)
-router.get('/quizzes/:quizId', 
-  authMiddleware, 
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+router.get('/quizzes/:quizId',
+  authMiddleware,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { quizId } = req.params;
     const includeAnswers = req.user!.role === 'admin' || req.user!.role === 'mentor';
     
@@ -243,9 +253,9 @@ router.get('/quizzes/:quizId',
 );
 
 // Submit quiz answers
-router.post('/quizzes/:quizId/submit', 
-  authMiddleware, 
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+router.post('/quizzes/:quizId/submit',
+  authMiddleware,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { quizId } = req.params;
     const { answers } = req.body;
     
@@ -260,9 +270,9 @@ router.post('/quizzes/:quizId/submit',
 );
 
 // Get quiz results
-router.get('/quizzes/:quizId/results/:userId', 
-  authMiddleware, 
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+router.get('/quizzes/:quizId/results/:userId',
+  authMiddleware,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { quizId, userId } = req.params;
     
     // Users can only see their own results unless they're admin/mentor
@@ -275,20 +285,21 @@ router.get('/quizzes/:quizId/results/:userId',
   })
 );
 
-// Get quiz statistics
-router.get('/quizzes/:quizId/stats', 
-  authMiddleware, 
+// Get quiz analytics
+router.get('/quizzes/:quizId/analytics',
+  authMiddleware,
   roleMiddleware(['mentor', 'admin']),
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { quizId } = req.params;
     
+    // For now, return basic quiz stats since getQuizAnalytics doesn't exist
     const stats = await quizService.getQuizStats(quizId);
     res.json(stats);
   })
 );
 
 // Get course quizzes
-router.get('/courses/:courseId/quizzes', asyncHandler(async (req, res) => {
+router.get('/courses/:courseId/quizzes', asyncHandler(async (req: Request, res: Response) => {
   const { courseId } = req.params;
   
   const quizzes = await quizService.getCourseQuizzes(courseId);
@@ -296,9 +307,9 @@ router.get('/courses/:courseId/quizzes', asyncHandler(async (req, res) => {
 }));
 
 // Get user quiz history
-router.get('/users/:userId/quiz-history', 
-  authMiddleware, 
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+router.get('/users/:userId/quiz-history',
+  authMiddleware,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { userId } = req.params;
     
     // Users can only see their own history unless they're admin
@@ -312,10 +323,10 @@ router.get('/users/:userId/quiz-history',
 );
 
 // Update quiz
-router.put('/quizzes/:quizId', 
-  authMiddleware, 
+router.put('/quizzes/:quizId',
+  authMiddleware,
   roleMiddleware(['mentor', 'admin']),
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { quizId } = req.params;
     const updates = req.body;
     
@@ -325,10 +336,10 @@ router.put('/quizzes/:quizId',
 );
 
 // Delete quiz
-router.delete('/quizzes/:quizId', 
-  authMiddleware, 
+router.delete('/quizzes/:quizId',
+  authMiddleware,
   roleMiddleware(['mentor', 'admin']),
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { quizId } = req.params;
     
     await quizService.deleteQuiz(quizId);
@@ -338,62 +349,68 @@ router.delete('/quizzes/:quizId',
 
 // ==================== ANALYTICS ROUTES ====================
 
-// Get learning metrics
-router.get('/analytics/metrics', 
-  authMiddleware, 
-  roleMiddleware(['mentor', 'admin']),
-  asyncHandler(async (req, res) => {
-    const filters = req.query;
-    
-    const metrics = await analyticsService.getLearningMetrics({
-      startDate: filters.startDate ? new Date(filters.startDate as string) : undefined,
-      endDate: filters.endDate ? new Date(filters.endDate as string) : undefined,
-      organizationId: filters.organizationId as string,
-    });
-    
-    res.json(metrics);
-  })
-);
-
 // Get course analytics
-router.get('/analytics/courses', 
-  authMiddleware, 
+router.get('/analytics/courses/:courseId',
+  authMiddleware,
   roleMiddleware(['mentor', 'admin']),
-  asyncHandler(async (req, res) => {
-    const filters = req.query;
+  asyncHandler(async (req: Request, res: Response) => {
+    const { courseId } = req.params;
+    const { period } = req.query;
     
-    const analytics = await analyticsService.getCourseAnalytics({
-      startDate: filters.startDate ? new Date(filters.startDate as string) : undefined,
-      endDate: filters.endDate ? new Date(filters.endDate as string) : undefined,
-      organizationId: filters.organizationId as string,
-    });
-    
+    const analytics = await analyticsService.getCourseAnalytics({ courseId });
     res.json(analytics);
   })
 );
 
 // Get user analytics
-router.get('/analytics/users', 
-  authMiddleware, 
-  roleMiddleware(['mentor', 'admin']),
-  asyncHandler(async (req, res) => {
-    const filters = req.query;
+router.get('/analytics/users/:userId',
+  authMiddleware,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { userId } = req.params;
+    const { period } = req.query;
     
-    const analytics = await analyticsService.getUserAnalytics({
-      startDate: filters.startDate ? new Date(filters.startDate as string) : undefined,
-      endDate: filters.endDate ? new Date(filters.endDate as string) : undefined,
-      organizationId: filters.organizationId as string,
-    });
+    // Users can only see their own analytics unless they're admin/mentor
+    if (req.user!.role !== 'admin' && req.user!.role !== 'mentor' && req.user!.id !== userId) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
     
+    const analytics = await analyticsService.getUserAnalytics({ userId });
+    res.json(analytics);
+  })
+);
+
+// Get organization analytics
+router.get('/analytics/organizations/:organizationId',
+  authMiddleware,
+  roleMiddleware(['admin']),
+  asyncHandler(async (req: Request, res: Response) => {
+    const { organizationId } = req.params;
+    const { period } = req.query;
+    
+    // Use getLearningMetrics with organization filter instead
+    const analytics = await analyticsService.getLearningMetrics({ organizationId });
+    res.json(analytics);
+  })
+);
+
+// Get system-wide analytics
+router.get('/analytics/system',
+  authMiddleware,
+  roleMiddleware(['admin']),
+  asyncHandler(async (req: Request, res: Response) => {
+    const { period } = req.query;
+    
+    // Use getLearningMetrics for system-wide analytics
+    const analytics = await analyticsService.getLearningMetrics();
     res.json(analytics);
   })
 );
 
 // Get learning trends
-router.get('/analytics/trends', 
-  authMiddleware, 
+router.get('/analytics/trends',
+  authMiddleware,
   roleMiddleware(['mentor', 'admin']),
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { period, startDate, endDate, organizationId } = req.query;
     
     const trends = await analyticsService.getLearningTrends({
@@ -407,10 +424,10 @@ router.get('/analytics/trends',
 );
 
 // Get skill gap analysis
-router.get('/analytics/skill-gaps', 
-  authMiddleware, 
+router.get('/analytics/skill-gaps',
+  authMiddleware,
   roleMiddleware(['mentor', 'admin']),
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { organizationId } = req.query;
     
     const gaps = await analyticsService.getSkillGapAnalysis(organizationId as string);
@@ -419,10 +436,10 @@ router.get('/analytics/skill-gaps',
 );
 
 // Get performance insights
-router.get('/analytics/performance', 
-  authMiddleware, 
+router.get('/analytics/performance',
+  authMiddleware,
   roleMiddleware(['mentor', 'admin']),
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const filters = req.query;
     
     const insights = await analyticsService.getPerformanceInsights({
@@ -438,29 +455,29 @@ router.get('/analytics/performance',
 // ==================== ORGANIZATION ROUTES ====================
 
 // Get organizations
-router.get('/organizations', asyncHandler(async (req, res) => {
-  const organizations = await db.select().from(organizations).orderBy(organizations.name);
-  res.json(organizations);
+router.get('/organizations', asyncHandler(async (req: Request, res: Response) => {
+  const orgList = await db.select().from(organizations).orderBy(organizations.name);
+  res.json(orgList);
 }));
 
 // Get organization by ID
-router.get('/organizations/:id', asyncHandler(async (req, res) => {
+router.get('/organizations/:id', asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   
-  const organization = await db.select().from(organizations).where(eq(organizations.id, id)).limit(1);
+  const orgRows = await db.select().from(organizations).where(eq(organizations.id, id)).limit(1);
   
-  if (!organization.length) {
+  if (!orgRows.length) {
     return res.status(404).json({ message: 'Organization not found' });
   }
   
-  res.json(organization[0]);
+  res.json(orgRows[0]);
 }));
 
 // Create organization
-router.post('/organizations', 
-  authMiddleware, 
+router.post('/organizations',
+  authMiddleware,
   roleMiddleware(['admin']),
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { name, type, description, settings } = req.body;
     
     const organization = await db.insert(organizations).values({
@@ -475,10 +492,10 @@ router.post('/organizations',
 );
 
 // Update organization
-router.put('/organizations/:id', 
-  authMiddleware, 
+router.put('/organizations/:id',
+  authMiddleware,
   roleMiddleware(['admin']),
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const updates = req.body;
     
@@ -498,12 +515,12 @@ router.put('/organizations/:id',
 // ==================== STUDY PLANS ROUTES ====================
 
 // Get user's study plans
-router.get('/study-plans', 
-  authMiddleware, 
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+router.get('/study-plans',
+  authMiddleware,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { isActive } = req.query;
     
-    let whereConditions = [eq(studyPlans.userId, req.user!.id)];
+    const whereConditions = [eq(studyPlans.userId, req.user!.id)];
     
     if (isActive !== undefined) {
       whereConditions.push(eq(studyPlans.isActive, isActive === 'true'));
@@ -519,9 +536,9 @@ router.get('/study-plans',
 );
 
 // Get study plan by ID
-router.get('/study-plans/:id', 
-  authMiddleware, 
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+router.get('/study-plans/:id',
+  authMiddleware,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
     
     const plan = await db.select()
@@ -541,9 +558,9 @@ router.get('/study-plans/:id',
 );
 
 // Update study plan
-router.put('/study-plans/:id', 
-  authMiddleware, 
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+router.put('/study-plans/:id',
+  authMiddleware,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
     const updates = req.body;
     
@@ -564,9 +581,9 @@ router.put('/study-plans/:id',
 );
 
 // Delete study plan
-router.delete('/study-plans/:id', 
-  authMiddleware, 
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+router.delete('/study-plans/:id',
+  authMiddleware,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
     
     await db.delete(studyPlans)
@@ -579,13 +596,31 @@ router.delete('/study-plans/:id',
   })
 );
 
+// Create a new study plan
+router.post('/study-plans',
+  authMiddleware,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { title, description, goals, schedule } = req.body;
+    
+    const plan = await db.insert(studyPlans).values({
+      userId: req.user!.id,
+      title,
+      description,
+      goals,
+      schedule,
+    }).returning();
+    
+    res.status(201).json(plan[0]);
+  })
+);
+
 // ==================== ENHANCED COURSE ROUTES ====================
 
 // Get courses with enhanced filtering and tagging
-router.get('/courses/enhanced', asyncHandler(async (req, res) => {
-  const { type, category, search, tags, organizationId } = req.query;
+router.get('/courses/enhanced', asyncHandler(async (req: Request, res: Response) => {
+  const { type, category, search, tags: tagIdsParam, organizationId } = req.query as Record<string, any>;
   
-  let whereConditions = [];
+  const whereConditions = [] as any[];
   
   if (type) {
     whereConditions.push(eq(courses.type, type as any));
@@ -599,19 +634,16 @@ router.get('/courses/enhanced', asyncHandler(async (req, res) => {
     whereConditions.push(eq(courses.organizationId, organizationId as string));
   }
   
-  let query = db.select().from(courses);
-  
-  if (whereConditions.length > 0) {
-    query = query.where(and(...whereConditions));
-  }
-  
-  let coursesData = await query.orderBy(desc(courses.createdAt));
+  let coursesData = await db.select()
+    .from(courses)
+    .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+    .orderBy(desc(courses.createdAt));
   
   // Filter by tags if specified
-  if (tags) {
-    const tagArray = (tags as string).split(',');
+  if (tagIdsParam) {
+    const tagArray = (tagIdsParam as string).split(',');
     coursesData = coursesData.filter(course => {
-      const courseTags = course.tags || [];
+      const courseTags = Array.isArray(course.tags) ? (course.tags as string[]) : [];
       return tagArray.some(tag => courseTags.includes(tag));
     });
   }
@@ -619,7 +651,7 @@ router.get('/courses/enhanced', asyncHandler(async (req, res) => {
   // Search functionality
   if (search) {
     const searchTerm = (search as string).toLowerCase();
-    coursesData = coursesData.filter(course => 
+    coursesData = coursesData.filter(course =>
       course.title.toLowerCase().includes(searchTerm) ||
       (course.description && course.description.toLowerCase().includes(searchTerm))
     );
@@ -628,10 +660,10 @@ router.get('/courses/enhanced', asyncHandler(async (req, res) => {
   // Get tags for each course
   const enhancedCourses = await Promise.all(
     coursesData.map(async (course) => {
-      const courseTags = await tagEngine.getCourseTags(course.id);
+      const courseTagList = await tagEngine.getCourseTags(course.id);
       return {
         ...course,
-        tags: courseTags,
+        tags: courseTagList,
       };
     })
   );
@@ -640,9 +672,9 @@ router.get('/courses/enhanced', asyncHandler(async (req, res) => {
 }));
 
 // Get course recommendations based on user preferences
-router.get('/courses/recommendations', 
-  authMiddleware, 
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+router.get('/courses/recommendations',
+  authMiddleware,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { limit = 5 } = req.query;
     
     // Get user's enrolled courses and their tags
@@ -657,9 +689,8 @@ router.get('/courses/recommendations',
     // Extract user's preferred tags
     const userTags = new Set<string>();
     userEnrollments.forEach(enrollment => {
-      if (enrollment.tags) {
-        enrollment.tags.forEach((tag: string) => userTags.add(tag));
-      }
+      const tagsArray = Array.isArray(enrollment.tags) ? (enrollment.tags as string[]) : [];
+      tagsArray.forEach((tag: string) => userTags.add(tag));
     });
     
     // Find courses with similar tags
@@ -680,13 +711,12 @@ router.get('/courses/recommendations',
     // Score recommendations based on tag similarity
     const scoredRecommendations = recommendations.map(course => {
       let score = 0;
-      if (course.tags) {
-        course.tags.forEach((tag: string) => {
-          if (userTags.has(tag)) {
-            score += 1;
-          }
-        });
-      }
+      const courseTags = Array.isArray(course.tags) ? (course.tags as string[]) : [];
+      courseTags.forEach((tag: string) => {
+        if (userTags.has(tag)) {
+          score += 1;
+        }
+      });
       return { ...course, recommendationScore: score };
     });
     

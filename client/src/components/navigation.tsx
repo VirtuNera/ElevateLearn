@@ -36,10 +36,10 @@ export default function Navigation({ currentRole, onRoleChange }: NavigationProp
   };
 
   const getUserInitials = () => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
+    if ((user as any)?.firstName && (user as any)?.lastName) {
+      return `${(user as any).firstName[0]}${(user as any).lastName[0]}`.toUpperCase();
     }
-    return user?.email?.[0]?.toUpperCase() || 'U';
+    return (user as any)?.email?.[0]?.toUpperCase() || 'U';
   };
 
   return (
@@ -88,7 +88,7 @@ export default function Navigation({ currentRole, onRoleChange }: NavigationProp
               size="sm" 
               className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700"
               onClick={() => {
-                const role = user?.role || 'learner';
+                const role = (user as any)?.role || 'learner';
                 window.location.href = `/nura-ai/${role}`;
               }}
             >
@@ -121,13 +121,13 @@ export default function Navigation({ currentRole, onRoleChange }: NavigationProp
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.profileImageUrl || undefined} />
+                    <AvatarImage src={(user as any)?.profileImageUrl || undefined} />
                     <AvatarFallback>{getUserInitials()}</AvatarFallback>
                   </Avatar>
                   <span className="hidden md:block font-medium">
-                    {user?.firstName && user?.lastName 
-                      ? `${user.firstName} ${user.lastName}`
-                      : user?.email
+                    {(user as any)?.firstName && (user as any)?.lastName 
+                      ? `${(user as any).firstName} ${(user as any).lastName}`
+                      : (user as any)?.email
                     }
                   </span>
                   <ChevronDown className="h-4 w-4" />
@@ -135,10 +135,10 @@ export default function Navigation({ currentRole, onRoleChange }: NavigationProp
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <div className="px-2 py-1.5">
-                  <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
-                  <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  <p className="text-sm font-medium">{(user as any)?.firstName} {(user as any)?.lastName}</p>
+                  <p className="text-xs text-muted-foreground">{(user as any)?.email}</p>
                   <Badge variant="secondary" className="mt-1 text-xs">
-                    {getRoleDisplayName(user?.role || 'learner')}
+                    {getRoleDisplayName((user as any)?.role || 'learner')}
                   </Badge>
                 </div>
                 <DropdownMenuSeparator />

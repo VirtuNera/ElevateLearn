@@ -158,7 +158,7 @@ export default function CreateCoursePage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Course Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select course type" />
@@ -208,7 +208,7 @@ export default function CreateCoursePage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Difficulty Level</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select difficulty" />

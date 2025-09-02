@@ -7,7 +7,6 @@ import {
   certifications,
   messages,
   notifications,
-  courseModules,
   type User,
   type UpsertUser,
   type Course,
@@ -26,7 +25,8 @@ import {
   type InsertNotification,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, asc, like, or, count, inArray } from "drizzle-orm";
+import { eq, and, desc, asc, ilike, or, count, inArray } from 'drizzle-orm';
+import { alias } from "drizzle-orm/pg-core";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -53,8 +53,10 @@ export interface IStorage {
   getAssignmentsByCourse(courseId: string): Promise<Assignment[]>;
   getAssignment(id: string): Promise<Assignment | undefined>;
   submitAssignment(submission: InsertAssignmentSubmission): Promise<AssignmentSubmission>;
+  createAssignmentSubmission(submission: InsertAssignmentSubmission): Promise<AssignmentSubmission>;
+  getAssignmentSubmissions(assignmentId: string): Promise<(AssignmentSubmission & { user: User })[]>;
   gradeAssignment(submissionId: string, points: number, feedback?: string): Promise<AssignmentSubmission | undefined>;
-  getSubmissionsByAssignment(assignmentId: string): Promise<(AssignmentSubmission & { user: User })[]>;
+  getSubmissionsByAssignment(assignmentId: string): Promise<(AssignmentSubmission & { user: User })[]>; // (kept if used elsewhere)
   getUserSubmissions(userId: string): Promise<(AssignmentSubmission & { assignment: Assignment })[]>;
 
   // Certification operations
@@ -69,7 +71,12 @@ export interface IStorage {
   // Notification operations
   createNotification(notification: InsertNotification): Promise<Notification>;
   getNotificationsByUser(userId: string): Promise<Notification[]>;
-  markNotificationAsRead(notificationId: string): Promise<boolean>;
+  markNotificationAsRead(notificationId: string, userId: string): Promise<boolean>;
+
+  // Dashboard operations
+  getLearnerDashboard(userId: string): Promise<any>;
+  getMentorDashboard(userId: string): Promise<any>;
+  getAdminDashboard(userId: string): Promise<any>;
 
   // Analytics operations
   getCoursesCount(): Promise<number>;
@@ -119,7 +126,7 @@ export class DatabaseStorage implements IStorage {
   async upsertUser(userData: UpsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
-      .values(userData)
+      .values({ ...userData, id: (userData as any).id! })
       .onConflictDoUpdate({
         target: users.id,
         set: {
@@ -138,26 +145,29 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCourses(filters?: { type?: string; category?: string; search?: string }): Promise<Course[]> {
-    let query = db.select().from(courses).where(eq(courses.isPublic, true));
-    
-    if (filters?.type) {
-      query = query.where(eq(courses.type, filters.type as any));
-    }
-    
-    if (filters?.category) {
-      query = query.where(eq(courses.category, filters.category));
-    }
-    
+    const conditions = [eq(courses.isPublic, true)];
+    if (filters?.type) conditions.push(eq(courses.type, filters.type as any));
+    if (filters?.category) conditions.push(eq(courses.category, filters.category));
     if (filters?.search) {
-      query = query.where(
+      conditions.push(
         or(
-          like(courses.title, `%${filters.search}%`),
-          like(courses.description, `%${filters.search}%`)
+          ilike(courses.title, `%${filters.search}%`),
+          ilike(courses.description || '', `%${filters.search}%`)
         )
       );
     }
-    
-    return await query.orderBy(desc(courses.createdAt));
+    if (conditions.length > 0) {
+      return await db
+        .select()
+        .from(courses)
+        .where(and(...conditions))
+        .orderBy(desc(courses.createdAt));
+    } else {
+      return await db
+        .select()
+        .from(courses)
+        .orderBy(desc(courses.createdAt));
+    }
   }
 
   async getCourse(id: string): Promise<Course | undefined> {
@@ -166,13 +176,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCoursesByMentor(mentorId: string): Promise<Course[]> {
-    return await db.select().from(courses)
+    return await db
+      .select()
+      .from(courses)
       .where(eq(courses.mentorId, mentorId))
       .orderBy(desc(courses.createdAt));
   }
 
   async updateCourse(id: string, updates: Partial<InsertCourse>): Promise<Course | undefined> {
-    const [course] = await db.update(courses)
+    const [course] = await db
+      .update(courses)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(courses.id, id))
       .returning();
@@ -180,8 +193,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteCourse(id: string): Promise<boolean> {
-    const result = await db.delete(courses).where(eq(courses.id, id));
-    return result.rowCount > 0;
+    const deleted = await db
+      .delete(courses)
+      .where(eq(courses.id, id))
+      .returning({ id: courses.id });
+    return deleted.length > 0;
   }
 
   // Enrollment operations
@@ -191,41 +207,48 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getEnrollmentsByUser(userId: string): Promise<(Enrollment & { course: Course })[]> {
-    return await db.select({
-      id: enrollments.id,
-      userId: enrollments.userId,
-      courseId: enrollments.courseId,
-      status: enrollments.status,
-      progress: enrollments.progress,
-      enrolledAt: enrollments.enrolledAt,
-      completedAt: enrollments.completedAt,
-      course: courses,
-    })
-    .from(enrollments)
-    .leftJoin(courses, eq(enrollments.courseId, courses.id))
-    .where(eq(enrollments.userId, userId))
-    .orderBy(desc(enrollments.enrolledAt));
+    return await db
+      .select({
+        id: enrollments.id,
+        userId: enrollments.userId,
+        courseId: enrollments.courseId,
+        status: enrollments.status,
+        progress: enrollments.progress,
+        enrolledAt: enrollments.enrolledAt,
+        completedAt: enrollments.completedAt,
+        lastAccessedAt: enrollments.lastAccessedAt,
+        timeSpent: enrollments.timeSpent,
+        course: courses,
+      })
+      .from(enrollments)
+      .leftJoin(courses, eq(enrollments.courseId, courses.id))
+      .where(eq(enrollments.userId, userId))
+      .orderBy(desc(enrollments.enrolledAt));
   }
 
   async getEnrollmentsByCourse(courseId: string): Promise<(Enrollment & { user: User })[]> {
-    return await db.select({
-      id: enrollments.id,
-      userId: enrollments.userId,
-      courseId: enrollments.courseId,
-      status: enrollments.status,
-      progress: enrollments.progress,
-      enrolledAt: enrollments.enrolledAt,
-      completedAt: enrollments.completedAt,
-      user: users,
-    })
-    .from(enrollments)
-    .leftJoin(users, eq(enrollments.userId, users.id))
-    .where(eq(enrollments.courseId, courseId))
-    .orderBy(desc(enrollments.enrolledAt));
+    return await db
+      .select({
+        id: enrollments.id,
+        userId: enrollments.userId,
+        courseId: enrollments.courseId,
+        status: enrollments.status,
+        progress: enrollments.progress,
+        enrolledAt: enrollments.enrolledAt,
+        completedAt: enrollments.completedAt,
+        lastAccessedAt: enrollments.lastAccessedAt,
+        timeSpent: enrollments.timeSpent,
+        user: users,
+      })
+      .from(enrollments)
+      .leftJoin(users, eq(enrollments.userId, users.id))
+      .where(eq(enrollments.courseId, courseId))
+      .orderBy(desc(enrollments.enrolledAt));
   }
 
   async updateEnrollmentProgress(enrollmentId: string, progress: number): Promise<Enrollment | undefined> {
-    const [enrollment] = await db.update(enrollments)
+    const [enrollment] = await db
+      .update(enrollments)
       .set({ progress })
       .where(eq(enrollments.id, enrollmentId))
       .returning();
@@ -233,11 +256,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async completeEnrollment(enrollmentId: string): Promise<Enrollment | undefined> {
-    const [enrollment] = await db.update(enrollments)
-      .set({ 
-        status: 'completed',
+    const [enrollment] = await db
+      .update(enrollments)
+      .set({
+        status: "completed",
         progress: 100,
-        completedAt: new Date()
+        completedAt: new Date(),
       })
       .where(eq(enrollments.id, enrollmentId))
       .returning();
@@ -251,7 +275,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAssignmentsByCourse(courseId: string): Promise<Assignment[]> {
-    return await db.select().from(assignments)
+    return await db
+      .select()
+      .from(assignments)
       .where(eq(assignments.courseId, courseId))
       .orderBy(asc(assignments.dueDate));
   }
@@ -261,20 +287,48 @@ export class DatabaseStorage implements IStorage {
     return assignment;
   }
 
-  async submitAssignment(submissionData: InsertAssignmentSubmission): Promise<AssignmentSubmission> {
-    const [submission] = await db.insert(assignmentSubmissions)
-      .values({ ...submissionData, status: 'submitted' })
+  async createAssignmentSubmission(submissionData: InsertAssignmentSubmission): Promise<AssignmentSubmission> {
+    const [submission] = await db
+      .insert(assignmentSubmissions)
+      .values({ ...submissionData, status: "submitted" })
       .returning();
     return submission;
   }
 
+  async submitAssignment(submissionData: InsertAssignmentSubmission): Promise<AssignmentSubmission> {
+    return this.createAssignmentSubmission(submissionData);
+  }
+
+  async getAssignmentSubmissions(assignmentId: string): Promise<(AssignmentSubmission & { user: User })[]> {
+    return await db
+      .select({
+        id: assignmentSubmissions.id,
+        assignmentId: assignmentSubmissions.assignmentId,
+        userId: assignmentSubmissions.userId,
+        content: assignmentSubmissions.content,
+        fileUrl: assignmentSubmissions.fileUrl,
+        status: assignmentSubmissions.status,
+        points: assignmentSubmissions.points,
+        feedback: assignmentSubmissions.feedback,
+        aiFeedback: assignmentSubmissions.aiFeedback,
+        submittedAt: assignmentSubmissions.submittedAt,
+        gradedAt: assignmentSubmissions.gradedAt,
+        user: users,
+      })
+      .from(assignmentSubmissions)
+      .leftJoin(users, eq(assignmentSubmissions.userId, users.id))
+      .where(eq(assignmentSubmissions.assignmentId, assignmentId))
+      .orderBy(desc(assignmentSubmissions.submittedAt));
+  }
+
   async gradeAssignment(submissionId: string, points: number, feedback?: string): Promise<AssignmentSubmission | undefined> {
-    const [submission] = await db.update(assignmentSubmissions)
-      .set({ 
+    const [submission] = await db
+      .update(assignmentSubmissions)
+      .set({
         points,
         feedback,
-        status: 'graded',
-        gradedAt: new Date()
+        status: "graded",
+        gradedAt: new Date(),
       })
       .where(eq(assignmentSubmissions.id, submissionId))
       .returning();
@@ -282,43 +336,47 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSubmissionsByAssignment(assignmentId: string): Promise<(AssignmentSubmission & { user: User })[]> {
-    return await db.select({
-      id: assignmentSubmissions.id,
-      assignmentId: assignmentSubmissions.assignmentId,
-      userId: assignmentSubmissions.userId,
-      content: assignmentSubmissions.content,
-      fileUrl: assignmentSubmissions.fileUrl,
-      status: assignmentSubmissions.status,
-      points: assignmentSubmissions.points,
-      feedback: assignmentSubmissions.feedback,
-      submittedAt: assignmentSubmissions.submittedAt,
-      gradedAt: assignmentSubmissions.gradedAt,
-      user: users,
-    })
-    .from(assignmentSubmissions)
-    .leftJoin(users, eq(assignmentSubmissions.userId, users.id))
-    .where(eq(assignmentSubmissions.assignmentId, assignmentId))
-    .orderBy(desc(assignmentSubmissions.submittedAt));
+    return await db
+      .select({
+        id: assignmentSubmissions.id,
+        assignmentId: assignmentSubmissions.assignmentId,
+        userId: assignmentSubmissions.userId,
+        content: assignmentSubmissions.content,
+        fileUrl: assignmentSubmissions.fileUrl,
+        status: assignmentSubmissions.status,
+        points: assignmentSubmissions.points,
+        feedback: assignmentSubmissions.feedback,
+        aiFeedback: assignmentSubmissions.aiFeedback,
+        submittedAt: assignmentSubmissions.submittedAt,
+        gradedAt: assignmentSubmissions.gradedAt,
+        user: users,
+      })
+      .from(assignmentSubmissions)
+      .leftJoin(users, eq(assignmentSubmissions.userId, users.id))
+      .where(eq(assignmentSubmissions.assignmentId, assignmentId))
+      .orderBy(desc(assignmentSubmissions.submittedAt));
   }
 
   async getUserSubmissions(userId: string): Promise<(AssignmentSubmission & { assignment: Assignment })[]> {
-    return await db.select({
-      id: assignmentSubmissions.id,
-      assignmentId: assignmentSubmissions.assignmentId,
-      userId: assignmentSubmissions.userId,
-      content: assignmentSubmissions.content,
-      fileUrl: assignmentSubmissions.fileUrl,
-      status: assignmentSubmissions.status,
-      points: assignmentSubmissions.points,
-      feedback: assignmentSubmissions.feedback,
-      submittedAt: assignmentSubmissions.submittedAt,
-      gradedAt: assignmentSubmissions.gradedAt,
-      assignment: assignments,
-    })
-    .from(assignmentSubmissions)
-    .leftJoin(assignments, eq(assignmentSubmissions.assignmentId, assignments.id))
-    .where(eq(assignmentSubmissions.userId, userId))
-    .orderBy(desc(assignmentSubmissions.submittedAt));
+    return await db
+      .select({
+        id: assignmentSubmissions.id,
+        assignmentId: assignmentSubmissions.assignmentId,
+        userId: assignmentSubmissions.userId,
+        content: assignmentSubmissions.content,
+        fileUrl: assignmentSubmissions.fileUrl,
+        status: assignmentSubmissions.status,
+        points: assignmentSubmissions.points,
+        feedback: assignmentSubmissions.feedback,
+        aiFeedback: assignmentSubmissions.aiFeedback,
+        submittedAt: assignmentSubmissions.submittedAt,
+        gradedAt: assignmentSubmissions.gradedAt,
+        assignment: assignments,
+      })
+      .from(assignmentSubmissions)
+      .leftJoin(assignments, eq(assignmentSubmissions.assignmentId, assignments.id))
+      .where(eq(assignmentSubmissions.userId, userId))
+      .orderBy(desc(assignmentSubmissions.submittedAt));
   }
 
   // Certification operations
@@ -328,7 +386,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCertificationsByUser(userId: string): Promise<Certification[]> {
-    return await db.select().from(certifications)
+    return await db
+      .select()
+      .from(certifications)
       .where(eq(certifications.userId, userId))
       .orderBy(desc(certifications.issuedAt));
   }
@@ -340,34 +400,47 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMessagesByUser(userId: string): Promise<(Message & { sender: User; recipient: User })[]> {
-    return await db.select({
-      id: messages.id,
-      senderId: messages.senderId,
-      recipientId: messages.recipientId,
-      subject: messages.subject,
-      content: messages.content,
-      isRead: messages.isRead,
-      createdAt: messages.createdAt,
-      sender: {
-        id: users.id,
-        firstName: users.firstName,
-        lastName: users.lastName,
-        email: users.email,
-        profileImageUrl: users.profileImageUrl,
-      },
-      recipient: users,
-    })
-    .from(messages)
-    .leftJoin(users, eq(messages.senderId, users.id))
-    .where(or(eq(messages.senderId, userId), eq(messages.recipientId, userId)))
-    .orderBy(desc(messages.createdAt));
+    const sender = alias(users, "sender");
+    const recipient = alias(users, "recipient");
+
+    return await db
+      .select({
+        id: messages.id,
+        senderId: messages.senderId,
+        recipientId: messages.recipientId,
+        subject: messages.subject,
+        content: messages.content,
+        isRead: messages.isRead,
+        createdAt: messages.createdAt,
+        sender: {
+          id: sender.id,
+          firstName: sender.firstName,
+          lastName: sender.lastName,
+          email: sender.email,
+          profileImageUrl: sender.profileImageUrl,
+        },
+        recipient: {
+          id: recipient.id,
+          firstName: recipient.firstName,
+          lastName: recipient.lastName,
+          email: recipient.email,
+          profileImageUrl: recipient.profileImageUrl,
+        },
+      })
+      .from(messages)
+      .leftJoin(sender, eq(messages.senderId, sender.id))
+      .leftJoin(recipient, eq(messages.recipientId, recipient.id))
+      .where(or(eq(messages.senderId, userId), eq(messages.recipientId, userId)))
+      .orderBy(desc(messages.createdAt));
   }
 
   async markMessageAsRead(messageId: string): Promise<boolean> {
-    const result = await db.update(messages)
+    const updated = await db
+      .update(messages)
       .set({ isRead: true })
-      .where(eq(messages.id, messageId));
-    return result.rowCount > 0;
+      .where(eq(messages.id, messageId))
+      .returning({ id: messages.id });
+    return updated.length > 0;
   }
 
   // Notification operations
@@ -377,48 +450,90 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNotificationsByUser(userId: string): Promise<Notification[]> {
-    return await db.select().from(notifications)
+    return await db
+      .select()
+      .from(notifications)
       .where(eq(notifications.userId, userId))
       .orderBy(desc(notifications.createdAt));
   }
 
-  async markNotificationAsRead(notificationId: string): Promise<boolean> {
-    const result = await db.update(notifications)
+  async markNotificationAsRead(notificationId: string, userId: string): Promise<boolean> {
+    const updated = await db
+      .update(notifications)
       .set({ isRead: true })
-      .where(eq(notifications.id, notificationId));
-    return result.rowCount > 0;
+      .where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)))
+      .returning({ id: notifications.id });
+    return updated.length > 0;
+  }
+
+  // Dashboard operations (placeholders)
+  async getLearnerDashboard(userId: string): Promise<any> {
+    return {
+      totalCourses: 0,
+      activeEnrollments: 0,
+      completedEnrollments: 0,
+      recentCertifications: [],
+      recentMessages: [],
+      recentNotifications: [],
+    };
+  }
+
+  async getMentorDashboard(userId: string): Promise<any> {
+    return {
+      totalCourses: 0,
+      activeEnrollments: 0,
+      completedEnrollments: 0,
+      recentAssignments: [],
+      recentSubmissions: [],
+      recentMessages: [],
+      recentNotifications: [],
+    };
+  }
+
+  async getAdminDashboard(userId: string): Promise<any> {
+    return {
+      totalUsers: 0,
+      totalCourses: 0,
+      activeEnrollments: 0,
+      completedEnrollments: 0,
+      recentActivities: [],
+      pendingCourses: [],
+      topPerformers: [],
+    };
   }
 
   // Analytics operations
   async getCoursesCount(): Promise<number> {
-    const [result] = await db.select({ count: count() }).from(courses);
-    return result.count;
+    const [r] = await db.select({ c: count() }).from(courses);
+    return Number(r.c);
   }
 
   async getActiveEnrollmentsCount(): Promise<number> {
-    const [result] = await db.select({ count: count() })
+    const [r] = await db
+      .select({ c: count() })
       .from(enrollments)
-      .where(eq(enrollments.status, 'active'));
-    return result.count;
+      .where(eq(enrollments.status, "active"));
+    return Number(r.c);
   }
 
   async getCompletedEnrollmentsCount(): Promise<number> {
-    const [result] = await db.select({ count: count() })
+    const [r] = await db
+      .select({ c: count() })
       .from(enrollments)
-      .where(eq(enrollments.status, 'completed'));
-    return result.count;
+      .where(eq(enrollments.status, "completed"));
+    return Number(r.c);
   }
 
   async getCertificationsCount(): Promise<number> {
-    const [result] = await db.select({ count: count() }).from(certifications);
-    return result.count;
+    const [r] = await db.select({ c: count() }).from(certifications);
+    return Number(r.c);
   }
 
   // Mentor-specific operations
   async getStudentsByMentor(mentorId: string): Promise<(User & { enrollments: (Enrollment & { course: Course })[] })[]> {
     const mentorCourses = await this.getCoursesByMentor(mentorId);
-    const courseIds = mentorCourses.map(course => course.id);
-    
+    const courseIds = mentorCourses.map((course) => course.id);
+
     if (courseIds.length === 0) return [];
 
     const enrollmentsWithDetails = await db
@@ -430,31 +545,25 @@ export class DatabaseStorage implements IStorage {
       .from(enrollments)
       .leftJoin(users, eq(enrollments.userId, users.id))
       .leftJoin(courses, eq(enrollments.courseId, courses.id))
-      .where(
-        and(
-          eq(enrollments.status, 'active'),
-          inArray(enrollments.courseId, courseIds)
-        )
-      )
+      .where(and(eq(enrollments.status, "active"), inArray(enrollments.courseId, courseIds)))
       .orderBy(users.firstName, users.lastName);
 
-    // Group by user
     const studentMap = new Map<string, User & { enrollments: (Enrollment & { course: Course })[] }>();
-    
+
     for (const row of enrollmentsWithDetails) {
       if (!row.user) continue;
-      
+
       if (!studentMap.has(row.user.id)) {
         studentMap.set(row.user.id, {
           ...row.user,
-          enrollments: []
+          enrollments: [],
         });
       }
-      
+
       if (row.enrollment && row.course) {
         studentMap.get(row.user.id)!.enrollments.push({
           ...row.enrollment,
-          course: row.course
+          course: row.course,
         });
       }
     }
@@ -464,8 +573,8 @@ export class DatabaseStorage implements IStorage {
 
   async getAssignmentsByMentor(mentorId: string): Promise<(Assignment & { course: Course; submissions: AssignmentSubmission[] })[]> {
     const mentorCourses = await this.getCoursesByMentor(mentorId);
-    const courseIds = mentorCourses.map(course => course.id);
-    
+    const courseIds = mentorCourses.map((course) => course.id);
+
     if (courseIds.length === 0) return [];
 
     const assignmentsWithCourses = await db
@@ -478,11 +587,10 @@ export class DatabaseStorage implements IStorage {
       .where(inArray(assignments.courseId, courseIds))
       .orderBy(desc(assignments.createdAt));
 
-    // Get submissions for each assignment
-    const result = [];
+    const result: (Assignment & { course: Course; submissions: AssignmentSubmission[] })[] = [];
     for (const row of assignmentsWithCourses) {
       if (!row.assignment || !row.course) continue;
-      
+
       const submissions = await db
         .select()
         .from(assignmentSubmissions)
@@ -491,7 +599,7 @@ export class DatabaseStorage implements IStorage {
       result.push({
         ...row.assignment,
         course: row.course,
-        submissions
+        submissions,
       });
     }
 
@@ -499,24 +607,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Admin-specific operations
-  async getAllUsers(filters?: { role?: string; search?: string }): Promise<User[]> {
-    let query = db.select().from(users);
-    
+    async getAllUsers(filters?: { role?: string; search?: string }): Promise<User[]> {
+    const conditions: any[] = [];
     if (filters?.role) {
-      query = query.where(eq(users.role, filters.role as any));
+      conditions.push(eq(users.role, filters.role as any));
     }
-    
     if (filters?.search) {
-      query = query.where(
+      conditions.push(
         or(
-          like(users.firstName, `%${filters.search}%`),
-          like(users.lastName, `%${filters.search}%`),
-          like(users.email, `%${filters.search}%`)
+          ilike(users.firstName, `%${filters.search}%`),
+          ilike(users.lastName, `%${filters.search}%`),
+          ilike(users.email, `%${filters.search}%`)
         )
       );
     }
     
-    return await query.orderBy(users.firstName, users.lastName);
+    const base = db.select().from(users);
+    const q = conditions.length ? base.where(and(...conditions)) : base;
+
+    return await q.orderBy(users.firstName, users.lastName);
   }
 
   async updateUserRole(userId: string, role: string): Promise<User | undefined> {
@@ -529,12 +638,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteUser(userId: string): Promise<boolean> {
-    const result = await db.delete(users).where(eq(users.id, userId));
-    return result.rowCount > 0;
+    const deleted = await db.delete(users).where(eq(users.id, userId)).returning({ id: users.id });
+    return deleted.length > 0;
   }
 
   async getPendingCourses(): Promise<Course[]> {
-    return await db.select().from(courses)
+    return await db
+      .select()
+      .from(courses)
       .where(eq(courses.isPublic, false))
       .orderBy(desc(courses.createdAt));
   }
@@ -549,8 +660,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async rejectCourse(courseId: string): Promise<boolean> {
-    const result = await db.delete(courses).where(eq(courses.id, courseId));
-    return result.rowCount > 0;
+    const deleted = await db.delete(courses).where(eq(courses.id, courseId)).returning({ id: courses.id });
+    return deleted.length > 0;
   }
 
   async getAnalyticsData(): Promise<{
@@ -558,70 +669,54 @@ export class DatabaseStorage implements IStorage {
     totalCourses: number;
     activeEnrollments: number;
     completedEnrollments: number;
-    monthlyStats: {
-      month: string;
-      enrollments: number;
-      completions: number;
-    }[];
-    coursesByCategory: {
-      category: string;
-      count: number;
-    }[];
-    usersByRole: {
-      role: string;
-      count: number;
-    }[];
+    monthlyStats: { month: string; enrollments: number; completions: number }[];
+    coursesByCategory: { category: string; count: number }[];
+    usersByRole: { role: string; count: number }[];
   }> {
-    // Get basic counts
-    const [totalUsers] = await db.select({ count: count() }).from(users);
-    const [totalCourses] = await db.select({ count: count() }).from(courses);
-    const [activeEnrollments] = await db.select({ count: count() })
-      .from(enrollments).where(eq(enrollments.status, 'active'));
-    const [completedEnrollments] = await db.select({ count: count() })
-      .from(enrollments).where(eq(enrollments.status, 'completed'));
+    const [tu] = await db.select({ c: count() }).from(users);
+    const [tc] = await db.select({ c: count() }).from(courses);
+    const [ae] = await db.select({ c: count() }).from(enrollments).where(eq(enrollments.status, "active"));
+    const [ce] = await db.select({ c: count() }).from(enrollments).where(eq(enrollments.status, "completed"));
 
-    // Get users by role
-    const usersByRole = await db
+    const usersByRoleRaw = await db
       .select({
         role: users.role,
-        count: count()
+        count: count(),
       })
       .from(users)
       .groupBy(users.role);
 
-    // Get courses by category
-    const coursesByCategory = await db
+    const coursesByCategoryRaw = await db
       .select({
         category: courses.category,
-        count: count()
+        count: count(),
       })
       .from(courses)
       .groupBy(courses.category);
 
-    // Generate mock monthly stats (in a real app, this would come from actual data)
     const monthlyStats = [
-      { month: 'Jan', enrollments: 45, completions: 32 },
-      { month: 'Feb', enrollments: 52, completions: 41 },
-      { month: 'Mar', enrollments: 67, completions: 53 },
-      { month: 'Apr', enrollments: 72, completions: 61 },
-      { month: 'May', enrollments: 83, completions: 74 },
-      { month: 'Jun', enrollments: 91, completions: 82 },
+      { month: "Jan", enrollments: 45, completions: 32 },
+      { month: "Feb", enrollments: 52, completions: 41 },
+      { month: "Mar", enrollments: 67, completions: 53 },
+      { month: "Apr", enrollments: 72, completions: 61 },
+      { month: "May", enrollments: 83, completions: 74 },
+      { month: "Jun", enrollments: 91, completions: 82 },
     ];
 
     return {
-      totalUsers: totalUsers.count,
-      totalCourses: totalCourses.count,
-      activeEnrollments: activeEnrollments.count,
-      completedEnrollments: completedEnrollments.count,
+      totalUsers: Number(tu.c),
+      totalCourses: Number(tc.c),
+      activeEnrollments: Number(ae.c),
+      completedEnrollments: Number(ce.c),
       monthlyStats,
-      coursesByCategory: coursesByCategory.map(c => ({
-        category: c.category || 'Uncategorized',
-        count: c.count
+      coursesByCategory: coursesByCategoryRaw.map((c) => ({
+        category: c.category || "Uncategorized",
+        count: Number(c.count),
       })),
-      usersByRole: usersByRole.map(u => ({
+      usersByRole: usersByRoleRaw.map((u) => ({
         role: u.role,
-        count: u.count
-      }))
+        count: Number(u.count),
+      })),
     };
   }
 }

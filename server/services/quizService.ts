@@ -147,7 +147,7 @@ export class QuizService {
       const existingSubmissions = await db.select().from(quizSubmissions)
         .where(and(eq(quizSubmissions.quizId, request.quizId), eq(quizSubmissions.userId, request.userId)));
 
-      if (existingSubmissions.length >= quiz[0].maxAttempts) {
+      if (existingSubmissions.length >= (quiz[0]?.maxAttempts || 1)) {
         throw createError(`Maximum attempts (${quiz[0].maxAttempts}) exceeded for this quiz`, 400);
       }
 
@@ -322,8 +322,8 @@ export class QuizService {
               submissionId,
               questionId: answer.questionId,
               userAnswer: answer.userAnswer,
-              correctAnswer: question[0].correctAnswer,
-              explanation: question[0].explanation,
+              correctAnswer: question[0].correctAnswer || '',
+              explanation: question[0].explanation || '',
             });
 
             // Update answer with AI feedback
@@ -395,7 +395,7 @@ export class QuizService {
       };
 
       for (const submission of submissions) {
-        const percentage = (submission.score / submission.maxScore) * 100;
+        const percentage = ((submission.score || 0) / (submission.maxScore || 1)) * 100;
         if (percentage <= 20) scoreDistribution['0-20%']++;
         else if (percentage <= 40) scoreDistribution['21-40%']++;
         else if (percentage <= 60) scoreDistribution['41-60%']++;

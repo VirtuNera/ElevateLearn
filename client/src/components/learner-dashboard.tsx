@@ -54,8 +54,8 @@ export default function LearnerDashboard() {
     queryKey: ['/api/certifications'],
   });
 
-  const activeCourses = enrollments.filter(e => e.status === 'active');
-  const completedCourses = enrollments.filter(e => e.status === 'completed');
+  const activeCourses = enrollments.filter((e: any) => e.status === 'active');
+  const completedCourses = enrollments.filter((e: any) => e.status === 'completed');
 
   const tabs = [
     { id: 'learning-hub', label: 'Learning Hub', icon: Search },
@@ -215,7 +215,7 @@ export default function LearnerDashboard() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {courses.slice(0, 6).map((course) => (
+                {courses.slice(0, 6).map((course: any) => (
                   <CourseCard key={course.id} course={course} />
                 ))}
               </div>
@@ -278,7 +278,7 @@ export default function LearnerDashboard() {
               </CardContent>
             </Card>
           ) : (
-            activeCourses.map((enrollment) => (
+            activeCourses.map((enrollment: any) => (
               <Card key={enrollment.id}>
                 <CardContent className="p-6">
                   <div className="flex flex-col lg:flex-row lg:items-center gap-6">
@@ -307,7 +307,12 @@ export default function LearnerDashboard() {
                     </div>
                     <div className="flex gap-3">
                       <Button>Continue</Button>
-                      <Button variant="outline">View Details</Button>
+                      <Button 
+                        variant="outline"
+                        onClick={() => window.location.href = `/course/${enrollment.course.id}`}
+                      >
+                        View Details
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -347,7 +352,7 @@ export default function LearnerDashboard() {
               </CardContent>
             </Card>
           ) : (
-            completedCourses.map((enrollment) => (
+            completedCourses.map((enrollment: any) => (
               <Card key={enrollment.id}>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -364,7 +369,12 @@ export default function LearnerDashboard() {
                     </div>
                     <div className="flex gap-3">
                       <Button variant="outline">View Certificate</Button>
-                      <Button variant="outline">Review Materials</Button>
+                      <Button 
+                        variant="outline"
+                        onClick={() => window.location.href = `/course/${enrollment.course.id}`}
+                      >
+                        Review Materials
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -399,7 +409,7 @@ export default function LearnerDashboard() {
               </Card>
             </div>
           ) : (
-            certifications.map((cert) => (
+            certifications.map((cert: any) => (
               <Card key={cert.id}>
                 <CardContent className="p-6 text-center">
                   <div className="bg-corporate/10 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">

@@ -9,7 +9,8 @@ import {
   insertAssignmentSchema,
   insertAssignmentSubmissionSchema,
   insertMessageSchema,
-  insertNotificationSchema
+  insertNotificationSchema,
+  insertCertificationSchema
 } from "@shared/schema";
 import enhancedRoutes from "./routes/enhanced";
 
@@ -83,6 +84,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating course:", error);
       res.status(500).json({ message: "Failed to create course" });
+    }
+  });
+
+  app.put('/api/courses/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const courseId = req.params.id;
+      const user = await storage.getUser(userId);
+      
+      if (user?.role !== 'mentor' && user?.role !== 'admin') {
+        return res.status(403).json({ message: "Only mentors and admins can update courses" });
+      }
+
+      // Check if the course exists and belongs to the user (unless admin)
+      const existingCourse = await storage.getCourse(courseId);
+      if (!existingCourse) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+
+      if (user?.role !== 'admin' && existingCourse.mentorId !== userId) {
+        return res.status(403).json({ message: "You can only update your own courses" });
+      }
+
+      const courseData = insertCourseSchema.partial().parse(req.body);
+      
+      const updatedCourse = await storage.updateCourse(courseId, courseData);
+      res.json(updatedCourse);
+    } catch (error) {
+      console.error("Error updating course:", error);
+      res.status(500).json({ message: "Failed to update course" });
     }
   });
 

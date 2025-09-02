@@ -90,7 +90,12 @@ export default function CourseCard({ course }: CourseCardProps) {
           </span>
         </div>
         
-        <h3 className="font-semibold text-on-surface mb-2">{course.title}</h3>
+        <h3 
+          className="font-semibold text-on-surface mb-2 cursor-pointer hover:text-primary transition-colors"
+          onClick={() => window.location.href = `/course/${course.id}`}
+        >
+          {course.title}
+        </h3>
         <p className="text-on-surface-variant text-sm mb-4 line-clamp-2">
           {course.description}
         </p>
