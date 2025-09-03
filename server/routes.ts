@@ -23,6 +23,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Apply enhanced routes with /api prefix
   app.use('/api', enhancedRoutes);
 
+  // Simple test endpoint (no database required)
+  app.get('/api/test', (req, res) => {
+    res.json({ 
+      message: 'API is working!',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development'
+    });
+  });
+
   // Health check endpoint for Railway
   app.get('/api/health', (req, res) => {
     res.json({ 
