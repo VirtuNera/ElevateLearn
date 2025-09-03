@@ -84,7 +84,7 @@ app.use((req, res, next) => {
   // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const HOST = process.env.HOST ?? '127.0.0.1';
+  const HOST = process.env.HOST ?? '0.0.0.0';  // Use 0.0.0.0 for Railway
   const PORT = Number(process.env.PORT) || 5000;
   server.listen(PORT, HOST, () => {
     log(`serving on port ${PORT} and host ${HOST}`);
