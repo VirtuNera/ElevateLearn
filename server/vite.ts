@@ -70,9 +70,17 @@ export function serveStatic(app: Express) {
   const distPath = path.resolve(process.cwd(), "dist", "public");
 
   if (!fs.existsSync(distPath)) {
-    throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`,
-    );
+    console.warn(`Warning: Build directory not found: ${distPath}. Running in API-only mode.`);
+    
+    // In production without frontend, just serve a simple message
+    app.use("*", (_req, res) => {
+      res.status(200).json({ 
+        message: "Elevate360 LMS API Server",
+        status: "running",
+        note: "Frontend not built - this is an API-only deployment"
+      });
+    });
+    return;
   }
 
   app.use(express.static(distPath));

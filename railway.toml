@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm run build:backend"
+buildCommand = "npm run build:frontend && npm run build:backend"
 
 [deploy]
 startCommand = "npm start"
