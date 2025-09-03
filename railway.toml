@@ -7,6 +7,8 @@ startCommand = "npm start"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
+port = 8080
 
 [env]
 NODE_ENV = "production"
+PORT = 8080
