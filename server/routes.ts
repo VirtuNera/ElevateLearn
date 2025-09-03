@@ -23,6 +23,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Apply enhanced routes with /api prefix
   app.use('/api', enhancedRoutes);
 
+  // Health check endpoint for Railway
+  app.get('/api/health', (req, res) => {
+    res.json({ 
+      status: 'healthy', 
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development'
+    });
+  });
+
   // Legacy routes for backward compatibility
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
