@@ -7,7 +7,8 @@ const getApiBaseUrl = () => {
     // You can set this via environment variable VITE_RAILWAY_URL
     const railwayUrl = import.meta.env.VITE_RAILWAY_URL;
     if (railwayUrl) {
-      return railwayUrl;
+      // Ensure the URL has https:// prefix
+      return railwayUrl.startsWith('http') ? railwayUrl : `https://${railwayUrl}`;
     }
     
     // Fallback to common Railway URL pattern

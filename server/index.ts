@@ -9,7 +9,12 @@ app.use(express.urlencoded({ extended: false }));
 
 // CORS middleware
 app.use(cors({
-  origin: ["https://virtunera.github.io"], // your Pages origin
+  origin: [
+    "https://virtunera.github.io",
+    "https://virtunera.github.io/ElevateLearn", // Your specific GitHub Pages URL
+    "http://localhost:5173", // Development
+    "http://localhost:3000"  // Alternative development port
+  ],
   credentials: true,                       // allow cookies
 }));
 
