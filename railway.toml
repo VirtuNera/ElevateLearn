@@ -1,9 +1,9 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm install && npm run build:backend"
+buildCommand = "echo 'No build needed for ultra-simple server'"
 
 [deploy]
-startCommand = "npm start"
+startCommand = "node ultra-simple-server.cjs"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
