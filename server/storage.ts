@@ -25,7 +25,8 @@ import {
   type InsertNotification,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, asc, ilike, or, count, inArray } from 'drizzle-orm';
+import { desc, asc, count } from 'drizzle-orm';
+import { eq, and, ilike, or, inArray } from "drizzle-orm/expressions";
 import { alias } from "drizzle-orm/pg-core";
 
 export interface IStorage {

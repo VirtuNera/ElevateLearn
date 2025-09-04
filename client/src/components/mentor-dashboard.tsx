@@ -764,14 +764,14 @@ export default function MentorDashboard() {
                 <CardContent>
                   {(() => {
                     const pendingSubmissions = mentorAssignments
-                                              .flatMap(assignment => 
-                          assignment.submissions
+                      .flatMap(assignment => 
+                        assignment.submissions
                             .filter((s: any) => s.status === 'submitted')
                             .map((submission: any) => ({
-                              ...submission,
-                              assignment: assignment
-                            }))
-                          )
+                            ...submission,
+                            assignment: assignment
+                          }))
+                      )
                       .sort((a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
 
                     return pendingSubmissions.length === 0 ? (
@@ -831,14 +831,14 @@ export default function MentorDashboard() {
                 <CardContent>
                   {(() => {
                     const gradedSubmissions = mentorAssignments
-                                              .flatMap(assignment => 
-                          assignment.submissions
+                      .flatMap(assignment => 
+                        assignment.submissions
                             .filter((s: any) => s.status === 'graded')
                             .map((submission: any) => ({
-                              ...submission,
-                              assignment: assignment
-                            }))
-                          )
+                            ...submission,
+                            assignment: assignment
+                          }))
+                      )
                       .sort((a, b) => new Date(b.gradedAt || 0).getTime() - new Date(a.gradedAt || 0).getTime())
                       .slice(0, 10); // Show only recent 10
 
