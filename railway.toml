@@ -3,7 +3,7 @@ builder = "nixpacks"
 buildCommand = "echo 'Build completed'"
 
 [deploy]
-startCommand = "node minimal-server.js"
+startCommand = "node minimal-server.cjs"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
