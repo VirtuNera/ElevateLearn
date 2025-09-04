@@ -62,19 +62,8 @@ export function DemoLogin({ isOpen, onClose }: DemoLoginProps) {
 
   const loginMutation = useMutation({
     mutationFn: async (userId: string) => {
-      const response = await fetch("/api/login", {
-        method: "POST",
-        body: JSON.stringify({ userId }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-      
-      if (!response.ok) {
-        throw new Error("Login failed");
-      }
-      
+      // Use apiRequest function to ensure correct URL handling
+      const response = await apiRequest("POST", "/api/login", { userId });
       return response.json();
     },
     onSuccess: () => {

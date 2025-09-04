@@ -1,0 +1,10 @@
+# Environment Variables for ElevateLearn Frontend
+# Copy this file to .env.local in the client directory
+
+# Railway Backend URL (required for production)
+# Replace with your actual Railway URL
+VITE_RAILWAY_URL=elevatelearn-production.up.railway.app
+
+# Other environment variables
+VITE_APP_NAME=Elevate360 LMS
+VITE_APP_VERSION=2.0.0
