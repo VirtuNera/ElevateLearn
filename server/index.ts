@@ -1,5 +1,4 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
 import { setupVite, log } from "./vite";
 import cors from "cors";
 
@@ -70,6 +69,7 @@ app.use((req, res, next) => {
     
     // Only register routes if database is available
     if (process.env.DATABASE_URL) {
+      const { registerRoutes } = await import("./routes");
       server = await registerRoutes(app);
       console.log('Routes registered successfully');
     } else {
