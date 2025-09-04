@@ -1,5 +1,5 @@
-// Ultra-minimal test server - no external dependencies
-const http = require('http');
+// Ultra-minimal test server - no external dependencies (ES Module version)
+import http from 'http';
 
 const server = http.createServer((req, res) => {
   // Set CORS headers
