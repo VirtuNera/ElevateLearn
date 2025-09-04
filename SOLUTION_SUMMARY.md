@@ -12,9 +12,13 @@ This file is being treated as an ES module because it has a '.js' file extension
 
 ## ✅ **Fix Applied**
 
-Changed the minimal server from CommonJS to ES Module syntax:
+**Solution 1**: Changed the minimal server from CommonJS to ES Module syntax:
 - **Before**: `const http = require('http');`
 - **After**: `import http from 'http';`
+
+**Solution 2**: Created a `.cjs` file to force CommonJS mode:
+- **File**: `minimal-server.cjs` (uses `require` syntax)
+- **Railway config**: Updated to use `node minimal-server.cjs`
 
 ## 🚀 **Next Steps**
 
@@ -66,5 +70,7 @@ Once the backend is working, update your frontend with the correct Railway URL.
 ## 📝 **Key Learning**
 
 The issue was that your project uses ES modules (`"type": "module"` in package.json), so all `.js` files must use ES module syntax (`import`) instead of CommonJS (`require`).
+
+**Alternative Solution**: Use `.cjs` file extension to force CommonJS mode, which bypasses the ES module requirement entirely.
 
 This is a common issue when mixing module systems in Node.js projects.

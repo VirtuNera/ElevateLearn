@@ -1,9 +1,9 @@
 [build]
 builder = "nixpacks"
-buildCommand = "echo 'Build completed'"
+buildCommand = "npm install && npm run build:backend"
 
 [deploy]
-startCommand = "node minimal-server.cjs"
+startCommand = "npm start"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"

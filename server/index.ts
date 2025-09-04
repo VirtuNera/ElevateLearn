@@ -13,7 +13,8 @@ app.get('/api/health', (req, res) => {
     status: 'healthy', 
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    port: process.env.PORT || '5000'
+    port: process.env.PORT || '5000',
+    database: process.env.DATABASE_URL ? 'configured' : 'missing'
   });
 });
 
@@ -65,8 +66,21 @@ app.use((req, res, next) => {
     console.log('Port:', process.env.PORT || '5000');
     console.log('Database URL:', process.env.DATABASE_URL ? 'Set' : 'Missing!');
     
-    const server = await registerRoutes(app);
-    console.log('Routes registered successfully');
+    let server: any;
+    
+    // Only register routes if database is available
+    if (process.env.DATABASE_URL) {
+      server = await registerRoutes(app);
+      console.log('Routes registered successfully');
+    } else {
+      console.log('⚠️  DATABASE_URL not set - running in limited mode');
+      // Add a simple test route
+      app.get('/api/test', (req, res) => {
+        res.json({ message: 'Server is running but database not configured' });
+      });
+      // Create a simple server for limited mode
+      server = app;
+    }
 
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       const status = err.status || err.statusCode || 500;
@@ -100,7 +114,7 @@ app.use((req, res, next) => {
     });
     
     // Handle server errors
-    server.on('error', (err) => {
+    server.on('error', (err: any) => {
       console.error('Server error:', err);
       process.exit(1);
     });

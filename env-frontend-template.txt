@@ -6,5 +6,5 @@
 VITE_RAILWAY_URL=elevatelearn-production.up.railway.app
 
 # Other environment variables
-VITE_APP_NAME=Elevate360 LMS
+VITE_APP_NAME=ElevateLearn
 VITE_APP_VERSION=2.0.0
