@@ -4,11 +4,11 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 const getApiBaseUrl = () => {
   if (import.meta.env.PROD) {
     // In production (GitHub Pages), use the Railway backend URL
-    // You can set this via environment variable VITE_RAILWAY_URL
-    const railwayUrl = import.meta.env.VITE_RAILWAY_URL;
-    if (railwayUrl) {
+    // Support both VITE_API_URL and VITE_RAILWAY_URL for flexibility
+    const apiUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_RAILWAY_URL;
+    if (apiUrl) {
       // Ensure the URL has https:// prefix
-      return railwayUrl.startsWith('http') ? railwayUrl : `https://${railwayUrl}`;
+      return apiUrl.startsWith('http') ? apiUrl : `https://${apiUrl}`;
     }
     
     // Fallback to common Railway URL pattern
@@ -24,6 +24,7 @@ const API_BASE_URL = getApiBaseUrl();
 // Debug logging to help identify the correct URL
 console.log('API Base URL:', API_BASE_URL);
 console.log('Environment:', import.meta.env.MODE);
+console.log('API URL from env:', import.meta.env.VITE_API_URL);
 console.log('Railway URL from env:', import.meta.env.VITE_RAILWAY_URL);
 
 async function throwIfResNotOk(res: Response) {

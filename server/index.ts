@@ -1,6 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { setupVite, log } from "./vite";
 import cors from "cors";
 
 const app = express();
@@ -90,15 +90,29 @@ app.use((req, res, next) => {
       throw err;
     });
 
-    // importantly only setup vite in development and after
-    // setting up all the other routes so the catch-all route
-    // doesn't interfere with the other routes
+    // API-only mode: only setup vite in development
     if (app.get("env") === "development") {
       await setupVite(app, server);
       console.log('Vite development server setup complete');
     } else {
-      serveStatic(app);
-      console.log('Static file serving setup complete');
+      // Production: API-only mode - no static file serving
+      console.log('Running in API-only mode (no static file serving)');
+      
+      // Add a simple root endpoint for API-only mode
+      app.get('/', (req, res) => {
+        res.json({
+          message: 'Elevate360 LMS API Server',
+          status: 'running',
+          version: '2.0.0',
+          endpoints: {
+            health: '/api/health',
+            auth: '/api/auth/*',
+            courses: '/api/courses/*',
+            users: '/api/users/*'
+          },
+          note: 'This is an API-only deployment. Frontend is served from GitHub Pages.'
+        });
+      });
     }
 
     // ALWAYS serve the app on the port specified in the environment variable PORT

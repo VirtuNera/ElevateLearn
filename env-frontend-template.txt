@@ -3,7 +3,10 @@
 
 # Railway Backend URL (required for production)
 # Replace with your actual Railway URL
-VITE_RAILWAY_URL=elevatelearn-production.up.railway.app
+VITE_API_URL=https://elevatelearn-production.up.railway.app
+
+# Alternative variable name (also supported)
+VITE_RAILWAY_URL=https://elevatelearn-production.up.railway.app
 
 # Other environment variables
 VITE_APP_NAME=ElevateLearn
