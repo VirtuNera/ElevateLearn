@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,7 @@ import { GraduationCap, University, Briefcase, Check, X } from "lucide-react";
 import { DemoLogin } from "@/components/demo-login";
 
 export default function Landing() {
+  const [, setLocation] = useLocation();
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
 
@@ -31,7 +33,7 @@ export default function Landing() {
               <Button 
                 variant="outline" 
                 className="text-white border-white/30 hover:bg-white/10"
-                onClick={() => window.location.href = "/"}
+                onClick={() => setLocation("/")}
               >
                 Access Dashboard
               </Button>

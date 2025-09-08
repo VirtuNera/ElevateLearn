@@ -39,15 +39,12 @@ function AppRouter() {
 }
 
 function App() {
-  // Get the base path for GitHub Pages
-  const basePath = import.meta.env.PROD ? '/ElevateLearn' : '';
-  
   return (
     <MockAuthProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
-          <Router base={basePath}>
+          <Router>
             <AppRouter />
           </Router>
         </TooltipProvider>
