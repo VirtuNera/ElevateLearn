@@ -4,6 +4,8 @@ import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useMockAuth } from "@/hooks/useMockAuth";
+import Navigation from "@/components/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,6 +29,7 @@ const createCourseFormSchema = insertCourseSchema.extend({
 type CreateCourseForm = z.infer<typeof createCourseFormSchema>;
 
 export default function CreateCoursePage() {
+  const { isAuthenticated, isLoading: authLoading, user } = useMockAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -89,8 +92,25 @@ export default function CreateCoursePage() {
     ));
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-on-surface-variant">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return null;
+  }
+
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-surface">
+      <Navigation />
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="flex items-center mb-8">
         <Button 
@@ -391,6 +411,7 @@ export default function CreateCoursePage() {
           </div>
         </form>
       </Form>
+      </div>
     </div>
   );
 }

@@ -4,6 +4,8 @@ import { useLocation, useParams } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useMockAuth } from "@/hooks/useMockAuth";
+import Navigation from "@/components/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,6 +25,7 @@ const editCourseFormSchema = insertCourseSchema.partial().extend({
 type EditCourseForm = z.infer<typeof editCourseFormSchema>;
 
 export default function EditCoursePage() {
+  const { isAuthenticated, isLoading: authLoading, user } = useMockAuth();
   const [, setLocation] = useLocation();
   const params = useParams();
   const courseId = params.id;
@@ -94,9 +97,26 @@ export default function EditCoursePage() {
     updateCourseMutation.mutate(data);
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-on-surface-variant">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return null;
+  }
+
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="min-h-screen bg-surface">
+        <Navigation />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="animate-pulse space-y-8">
           <div className="flex items-center mb-8">
             <div className="h-10 w-32 bg-gray-200 rounded mr-4"></div>
@@ -122,13 +142,16 @@ export default function EditCoursePage() {
             ))}
           </div>
         </div>
+        </div>
       </div>
     );
   }
 
   if (!course) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="min-h-screen bg-surface">
+        <Navigation />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center py-12">
           <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-medium text-on-surface mb-2">Course not found</h3>
@@ -137,12 +160,15 @@ export default function EditCoursePage() {
             Back to Dashboard
           </Button>
         </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-surface">
+      <Navigation />
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="flex items-center mb-8">
         <Button 
@@ -395,6 +421,7 @@ export default function EditCoursePage() {
           </div>
         </form>
       </Form>
+      </div>
     </div>
   );
 }

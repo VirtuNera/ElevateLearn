@@ -8,9 +8,9 @@ import { MockAuthProvider } from "@/contexts/MockAuthContext";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import NotFound from "@/pages/not-found";
-import LearnerNuraAI from "@/components/learner-nura-ai";
-import MentorNuraAI from "@/components/mentor-nura-ai";
-import AdminNuraAI from "@/components/admin-nura-ai";
+import NuraAILearnerPage from "@/pages/nura-ai-learner";
+import NuraAIMentorPage from "@/pages/nura-ai-mentor";
+import NuraAIAdminPage from "@/pages/nura-ai-admin";
 import CoursePage from "@/pages/course";
 import CreateCoursePage from "@/pages/create-course";
 import EditCoursePage from "@/pages/edit-course";
@@ -25,9 +25,9 @@ function AppRouter() {
       ) : (
         <>
           <Route path="/" component={Dashboard} />
-          <Route path="/nura-ai/learner" component={LearnerNuraAI} />
-          <Route path="/nura-ai/mentor" component={MentorNuraAI} />
-          <Route path="/nura-ai/admin" component={AdminNuraAI} />
+          <Route path="/nura-ai/learner" component={NuraAILearnerPage} />
+          <Route path="/nura-ai/mentor" component={NuraAIMentorPage} />
+          <Route path="/nura-ai/admin" component={NuraAIAdminPage} />
           <Route path="/course/:id" component={CoursePage} />
           <Route path="/create-course" component={CreateCoursePage} />
           <Route path="/edit-course/:id" component={EditCoursePage} />

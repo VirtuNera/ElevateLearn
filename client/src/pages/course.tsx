@@ -1,5 +1,7 @@
 import { useRoute } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useMockAuth } from "@/hooks/useMockAuth";
+import Navigation from "@/components/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -213,6 +215,7 @@ const createDummyCourseData = (courseId: string) => ({
 });
 
 export default function CoursePage() {
+  const { isAuthenticated, isLoading: authLoading, user } = useMockAuth();
   const [, params] = useRoute('/course/:id');
   const courseId = params?.id;
 
@@ -225,6 +228,21 @@ export default function CoursePage() {
     },
     enabled: !!courseId
   });
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-on-surface-variant">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return null;
+  }
 
   if (isLoading) {
     return (
@@ -258,6 +276,7 @@ export default function CoursePage() {
   
   return (
     <div className="min-h-screen bg-surface">
+      <Navigation />
       {/* Header */}
       <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
