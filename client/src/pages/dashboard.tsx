@@ -10,6 +10,9 @@ export default function Dashboard() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading, user } = useMockAuth();
 
+  // Debug logging
+  console.log('Dashboard rendered with user:', user);
+
   // Authentication bypassed - no redirect needed
 
   if (isLoading) {

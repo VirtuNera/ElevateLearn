@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useMockAuth } from "@/hooks/useMockAuth";
+import { MockAuthProvider } from "@/contexts/MockAuthContext";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import NotFound from "@/pages/not-found";
@@ -42,14 +43,16 @@ function App() {
   const basePath = import.meta.env.PROD ? '/ElevateLearn' : '';
   
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router base={basePath}>
-          <AppRouter />
-        </Router>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <MockAuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Router base={basePath}>
+            <AppRouter />
+          </Router>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </MockAuthProvider>
   );
 }
 

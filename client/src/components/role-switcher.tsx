@@ -40,6 +40,7 @@ export function RoleSwitcher() {
   };
 
   const handleRoleSwitch = (role: string) => {
+    console.log('Switching to role:', role);
     switchUser(role);
     toast({
       title: "Role switched",
