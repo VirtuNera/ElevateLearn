@@ -34,11 +34,6 @@ jobs:
       run: npm ci
       
     - name: Build frontend only
-      env:
-        VITE_API_URL: https://elevatelearn-production.up.railway.app
-        VITE_RAILWAY_URL: https://elevatelearn-production.up.railway.app
-        VITE_APP_NAME: ElevateLearn
-        VITE_APP_VERSION: 2.0.0
       run: |
         # Build only the frontend React app
         npm run build:frontend

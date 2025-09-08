@@ -20,7 +20,7 @@ function AppRouter() {
 
   return (
     <Switch>
-      {!isAuthenticated ? (
+      {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
         <>
@@ -39,12 +39,15 @@ function AppRouter() {
 }
 
 function App() {
+  // Get the base path for GitHub Pages
+  const basePath = import.meta.env.PROD ? '/ElevateLearn' : '';
+  
   return (
     <MockAuthProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
-          <Router>
+          <Router base={basePath}>
             <AppRouter />
           </Router>
         </TooltipProvider>

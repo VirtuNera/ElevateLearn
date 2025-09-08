@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
 import { useMockAuth } from "@/hooks/useMockAuth";
 import { RoleSwitcher } from "./role-switcher";
 import { Button } from "@/components/ui/button";
@@ -21,7 +20,6 @@ interface NavigationProps {
 
 export default function Navigation({ currentRole, onRoleChange }: NavigationProps) {
   const { user, logout } = useMockAuth();
-  const [, setLocation] = useLocation();
   const [unreadNotifications] = useState(3);
   const [unreadMessages] = useState(2);
 
@@ -67,7 +65,7 @@ export default function Navigation({ currentRole, onRoleChange }: NavigationProp
               className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700"
               onClick={() => {
                 const role = (user as any)?.role || 'learner';
-                setLocation(`/nura-ai/${role}`);
+                window.location.href = `/nura-ai/${role}`;
               }}
             >
               <Sparkles className="h-5 w-5 mr-2" />
