@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -72,6 +73,7 @@ const mockCourseReport = {
 };
 
 export default function MentorNuraAI() {
+  const [, setLocation] = useLocation();
   const [selectedStudent, setSelectedStudent] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
@@ -102,7 +104,7 @@ export default function MentorNuraAI() {
       <div className="flex items-center justify-between mb-6">
         <Button 
           variant="outline" 
-          onClick={() => window.location.href = '/'}
+          onClick={() => setLocation('/')}
           className="flex items-center space-x-2"
         >
           <ArrowLeft className="h-4 w-4" />

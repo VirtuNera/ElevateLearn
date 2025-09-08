@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { useLocation } from "wouter";
 
 // Mock demo users
 const DEMO_USERS = [
@@ -44,6 +45,7 @@ interface MockAuthContextType {
 const MockAuthContext = createContext<MockAuthContextType | undefined>(undefined);
 
 export function MockAuthProvider({ children }: { children: ReactNode }) {
+  const [, setLocation] = useLocation();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -69,7 +71,7 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setCurrentUser(null);
     // Redirect to landing page
-    window.location.href = "/";
+    setLocation("/");
   };
 
   const value = {

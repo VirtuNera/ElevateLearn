@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,7 @@ import {
 type TabType = 'learning-hub' | 'active-courses' | 'completed' | 'credentials';
 
 export default function LearnerDashboard() {
+  const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<TabType>('learning-hub');
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -309,7 +311,7 @@ export default function LearnerDashboard() {
                       <Button>Continue</Button>
                       <Button 
                         variant="outline"
-                        onClick={() => window.location.href = `/course/${enrollment.course.id}`}
+                        onClick={() => setLocation(`/course/${enrollment.course.id}`)}
                       >
                         View Details
                       </Button>
@@ -371,7 +373,7 @@ export default function LearnerDashboard() {
                       <Button variant="outline">View Certificate</Button>
                       <Button 
                         variant="outline"
-                        onClick={() => window.location.href = `/course/${enrollment.course.id}`}
+                        onClick={() => setLocation(`/course/${enrollment.course.id}`)}
                       >
                         Review Materials
                       </Button>
@@ -437,7 +439,7 @@ export default function LearnerDashboard() {
           </div>
           <Button 
             className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white"
-            onClick={() => window.location.href = '/nura-ai/learner'}
+            onClick={() => setLocation('/nura-ai/learner')}
           >
             <Sparkles className="h-5 w-5 mr-2" />
             Open Nura AI

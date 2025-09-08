@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,6 +45,7 @@ const mockRecommendation = {
 };
 
 export default function LearnerNuraAI() {
+  const [, setLocation] = useLocation();
   const [elinInput, setElinInput] = useState('');
   const [elinOutput, setElinOutput] = useState('');
   const [isElinLoading, setIsElinLoading] = useState(false);
@@ -94,7 +96,7 @@ Would you like me to provide some specific examples or practice exercises?`);
       <div className="flex items-center justify-between mb-6">
         <Button 
           variant="outline" 
-          onClick={() => window.location.href = '/'}
+          onClick={() => setLocation('/')}
           className="flex items-center space-x-2"
         >
           <ArrowLeft className="h-4 w-4" />

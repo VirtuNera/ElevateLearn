@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -83,6 +84,7 @@ interface EnhancedAnalytics {
 }
 
 export default function AdminDashboard() {
+  const [, setLocation] = useLocation();
   const [activeView, setActiveView] = useState<'overview' | 'users' | 'courses' | 'analytics'>('overview');
   const [userFilters, setUserFilters] = useState({ role: 'all', search: '' });
   const [courseFilter, setCourseFilter] = useState('pending');
@@ -988,7 +990,7 @@ export default function AdminDashboard() {
           </div>
           <Button 
             className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white"
-            onClick={() => window.location.href = '/nura-ai/admin'}
+            onClick={() => setLocation('/nura-ai/admin')}
           >
             <Sparkles className="h-5 w-5 mr-2" />
             Open Nura AI

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +47,7 @@ import {
 } from "lucide-react";
 
 export default function MentorDashboard() {
+  const [, setLocation] = useLocation();
   const [activeView, setActiveView] = useState<'overview' | 'courses' | 'students' | 'assignments'>('overview');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -74,7 +76,7 @@ export default function MentorDashboard() {
         </div>
         <Button 
           className="flex items-center space-x-2"
-          onClick={() => window.location.href = '/create-course'}
+          onClick={() => setLocation('/create-course')}
         >
           <Plus className="h-4 w-4" />
           <span>Create Course</span>
@@ -213,7 +215,7 @@ export default function MentorDashboard() {
                 <Button 
                   variant="outline" 
                   className="h-20 flex flex-col items-center space-y-2"
-                  onClick={() => window.location.href = '/create-course'}
+                  onClick={() => setLocation('/create-course')}
                 >
                   <Plus className="h-5 w-5" />
                   <span className="text-sm">Create Course</span>
@@ -261,7 +263,7 @@ export default function MentorDashboard() {
                 <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-on-surface mb-2">No courses yet</h3>
                 <p className="text-on-surface-variant mb-4">Create your first course to start teaching</p>
-                <Button onClick={() => window.location.href = '/create-course'}>Create Course</Button>
+                <Button onClick={() => setLocation('/create-course')}>Create Course</Button>
               </CardContent>
             </Card>
           ) : (
@@ -296,13 +298,13 @@ export default function MentorDashboard() {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => window.location.href = `/edit-course/${course.id}`}
+                          onClick={() => setLocation(`/edit-course/${course.id}`)}
                         >
                           Edit
                         </Button>
                         <Button 
                           size="sm"
-                          onClick={() => window.location.href = `/course/${course.id}`}
+                          onClick={() => setLocation(`/course/${course.id}`)}
                         >
                           View Details
                         </Button>
@@ -907,7 +909,7 @@ export default function MentorDashboard() {
           </div>
           <Button 
             className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white"
-            onClick={() => window.location.href = '/nura-ai/mentor'}
+            onClick={() => setLocation('/nura-ai/mentor')}
           >
             <Sparkles className="h-5 w-5 mr-2" />
             Open Nura AI
