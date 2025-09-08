@@ -8,13 +8,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { GraduationCap, University, Briefcase, Check, X } from "lucide-react";
 import { DemoLogin } from "@/components/demo-login";
+import { useMockAuth } from "@/hooks/useMockAuth";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
+  const { switchUser } = useMockAuth();
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
 
   const [showDemoLogin, setShowDemoLogin] = useState(false);
+
+  const handleAccessDashboard = () => {
+    // Set default learner role and navigate to dashboard
+    switchUser("learner");
+    setLocation("/");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-palette">
@@ -33,7 +41,7 @@ export default function Landing() {
               <Button 
                 variant="outline" 
                 className="text-white border-white/30 hover:bg-white/10"
-                onClick={() => setLocation("/")}
+                onClick={handleAccessDashboard}
               >
                 Access Dashboard
               </Button>

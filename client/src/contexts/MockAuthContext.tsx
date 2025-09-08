@@ -50,10 +50,14 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
+    // Check if user wants to access dashboard directly
+    const storedRole = localStorage.getItem('mockUserRole');
+    const defaultUser = storedRole 
+      ? DEMO_USERS.find(user => user.role === storedRole) 
+      : DEMO_USERS.find(user => user.role === "learner") || DEMO_USERS[0];
+
     // Simulate loading time
     const timer = setTimeout(() => {
-      // Default to learner role for demo
-      const defaultUser = DEMO_USERS.find(user => user.role === "learner") || DEMO_USERS[0];
       setCurrentUser(defaultUser);
       setIsLoading(false);
     }, 500);
@@ -65,6 +69,7 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
     const user = DEMO_USERS.find(u => u.role === role);
     if (user) {
       setCurrentUser(user);
+      localStorage.setItem('mockUserRole', role);
     }
   };
 
