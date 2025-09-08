@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useMockAuth } from "@/hooks/useMockAuth";
+import { RoleSwitcher } from "./role-switcher";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
@@ -18,12 +19,12 @@ interface NavigationProps {
 }
 
 export default function Navigation({ currentRole, onRoleChange }: NavigationProps) {
-  const { user } = useAuth();
+  const { user, logout } = useMockAuth();
   const [unreadNotifications] = useState(3);
   const [unreadMessages] = useState(2);
 
   const handleLogout = () => {
-    window.location.href = "/api/logout";
+    logout();
   };
 
   const getRoleDisplayName = (role: string) => {
@@ -53,32 +54,7 @@ export default function Navigation({ currentRole, onRoleChange }: NavigationProp
             </div>
             
             {/* Role Switcher */}
-            <div className="hidden md:flex bg-gray-100 rounded-lg p-1">
-              <Button
-                size="sm"
-                variant={currentRole === 'learner' || !currentRole ? 'default' : 'ghost'}
-                className="text-xs"
-                onClick={() => onRoleChange?.('learner')}
-              >
-                Learner
-              </Button>
-              <Button
-                size="sm"
-                variant={currentRole === 'mentor' ? 'default' : 'ghost'}
-                className="text-xs"
-                onClick={() => onRoleChange?.('mentor')}
-              >
-                Mentor
-              </Button>
-              <Button
-                size="sm"
-                variant={currentRole === 'admin' ? 'default' : 'ghost'}
-                className="text-xs"
-                onClick={() => onRoleChange?.('admin')}
-              >
-                Admin
-              </Button>
-            </div>
+            <RoleSwitcher />
           </div>
           
           <div className="flex items-center space-x-4">

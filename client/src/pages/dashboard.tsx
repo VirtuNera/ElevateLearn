@@ -1,4 +1,4 @@
-import { useAuth } from "@/hooks/useAuth";
+import { useMockAuth } from "@/hooks/useMockAuth";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import LearnerDashboard from "@/components/learner-dashboard";
@@ -8,21 +8,9 @@ import Navigation from "@/components/navigation";
 
 export default function Dashboard() {
   const { toast } = useToast();
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading, user } = useMockAuth();
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
+  // Authentication bypassed - no redirect needed
 
   if (isLoading) {
     return (

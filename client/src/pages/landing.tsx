@@ -28,6 +28,13 @@ export default function Landing() {
               <a href="#features" className="text-white/90 hover:text-white transition-colors">Features</a>
               <a href="#courses" className="text-white/90 hover:text-white transition-colors">Courses</a>
               <a href="#about" className="text-white/90 hover:text-white transition-colors">About</a>
+              <Button 
+                variant="outline" 
+                className="text-white border-white/30 hover:bg-white/10"
+                onClick={() => window.location.href = "/"}
+              >
+                Access Dashboard
+              </Button>
             </div>
             <div className="flex space-x-3">
               <Button
