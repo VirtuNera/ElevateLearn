@@ -115,15 +115,12 @@ app.use((req, res, next) => {
       });
     }
 
-    // ALWAYS serve the app on the port specified in the environment variable PORT
-    // Railway expects the app to listen on the PORT environment variable
-    // this serves both the API and the client.
-    const HOST = process.env.HOST ?? '0.0.0.0';  // Use 0.0.0.0 for Railway
-    const PORT = Number(process.env.PORT) || 8080;
+    // Use `PORT` provided in environment or default to 5000
+    const port = Number(process.env.PORT) || 5000;
     
-    console.log(`Attempting to listen on ${HOST}:${PORT}`);
-    server.listen(PORT, HOST, () => {
-      log(`✅ Server started successfully on port ${PORT} and host ${HOST}`);
+    console.log(`Attempting to listen on 0.0.0.0:${port}`);
+    server.listen(port, "0.0.0.0", () => {
+      log(`✅ Server started successfully on port ${port} and host 0.0.0.0`);
       console.log(`🚀 Elevate360 LMS API server is running!`);
     });
     
