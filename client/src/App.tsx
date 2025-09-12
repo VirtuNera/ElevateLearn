@@ -3,7 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useMockAuth } from "@/hooks/useMockAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { MockAuthProvider } from "@/contexts/MockAuthContext";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
@@ -16,7 +16,7 @@ import CreateCoursePage from "@/pages/create-course";
 import EditCoursePage from "@/pages/edit-course";
 
 function AppRouter() {
-  const { isAuthenticated, isLoading } = useMockAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   return (
     <Switch>

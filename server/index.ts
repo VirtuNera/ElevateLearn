@@ -27,16 +27,35 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// CORS middleware
+// CORS middleware (dynamic allowlist)
 app.use(cors({
-  origin: [
-    "https://elevatelearn-frontend.onrender.com", // Your Render frontend URL
-    "https://virtunera.github.io", // Keep GitHub Pages for fallback
-    "https://virtunera.github.io/ElevateLearn", // Your specific GitHub Pages URL
-    "http://localhost:5173", // Development
-    "http://localhost:3000"  // Alternative development port
-  ],
-  credentials: true,                       // allow cookies
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      "https://elevatelearn-frontend.onrender.com", // Render frontend
+      "https://virtunera.github.io",                // GitHub Pages root
+      "https://virtunera.github.io/ElevateLearn",   // GitHub Pages project path
+      "http://localhost:5173",                      // Vite dev
+      "http://localhost:3000"                       // Alt dev
+    ];
+
+    // Append extra origins from env (comma-separated)
+    if (process.env.CORS_EXTRA_ORIGINS) {
+      const extras = process.env.CORS_EXTRA_ORIGINS
+        .split(',')
+        .map(o => o.trim())
+        .filter(Boolean);
+      allowedOrigins.push(...extras);
+    }
+
+    // Allow non-browser clients without Origin (e.g., curl, Postman, server-to-server)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true, // allow cookies
 }));
 
 app.use((req, res, next) => {
