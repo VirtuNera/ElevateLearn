@@ -16,7 +16,7 @@ export default defineConfig({
         ]
       : []),
   ],
-  base: process.env.NODE_ENV === 'production' ? '/ElevateLearn/' : '/',
+  base: '/', // Remove GitHub Pages base path for Render
   resolve: {
     alias: {
       "@": path.resolve(process.cwd(), "client", "src"),

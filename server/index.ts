@@ -20,7 +20,8 @@ app.get('/api/health', (req, res) => {
 // CORS middleware
 app.use(cors({
   origin: [
-    "https://virtunera.github.io",
+    "https://elevatelearn-frontend.onrender.com", // Your Render frontend URL
+    "https://virtunera.github.io", // Keep GitHub Pages for fallback
     "https://virtunera.github.io/ElevateLearn", // Your specific GitHub Pages URL
     "http://localhost:5173", // Development
     "http://localhost:3000"  // Alternative development port

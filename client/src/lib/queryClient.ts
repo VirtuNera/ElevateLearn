@@ -1,9 +1,9 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
-// Get the API base URL - use Railway URL in production, relative URL in development
+// Get the API base URL - use Render URL in production, relative URL in development
 const getApiBaseUrl = () => {
   if (import.meta.env.PROD) {
-    // In production (GitHub Pages), use the Railway backend URL
+    // In production, use the Render backend URL
     // Support both VITE_API_URL and VITE_RAILWAY_URL for flexibility
     const apiUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_RAILWAY_URL;
     if (apiUrl) {
@@ -11,9 +11,8 @@ const getApiBaseUrl = () => {
       return apiUrl.startsWith('http') ? apiUrl : `https://${apiUrl}`;
     }
     
-    // Fallback to common Railway URL pattern
-    // You can replace this with your actual Railway URL
-    return 'https://elevatelearn-production.up.railway.app';
+    // Fallback to Render URL pattern
+    return 'https://elevatelearn-backend.onrender.com';
   }
   // In development, use relative URL
   return '';
