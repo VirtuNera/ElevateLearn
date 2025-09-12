@@ -1,6 +1,16 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { setupVite, log } from "./vite";
 import cors from "cors";
+
+// Production-safe logging function
+function log(message: string, source = "express") {
+  const formattedTime = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+  console.log(`${formattedTime} [${source}] ${message}`);
+}
 
 const app = express();
 app.use(express.json());
@@ -91,30 +101,24 @@ app.use((req, res, next) => {
       throw err;
     });
 
-    // API-only mode: only setup vite in development
-    if (app.get("env") === "development") {
-      await setupVite(app, server);
-      console.log('Vite development server setup complete');
-    } else {
-      // Production: API-only mode - no static file serving
-      console.log('Running in API-only mode (no static file serving)');
-      
-      // Add a simple root endpoint for API-only mode
-      app.get('/', (req, res) => {
-        res.json({
-          message: 'Elevate360 LMS API Server',
-          status: 'running',
-          version: '2.0.0',
-          endpoints: {
-            health: '/api/health',
-            auth: '/api/auth/*',
-            courses: '/api/courses/*',
-            users: '/api/users/*'
-          },
-          note: 'This is an API-only deployment. Frontend is served from GitHub Pages.'
-        });
+    // Production: API-only mode - no static file serving
+    console.log('Running in API-only mode (no static file serving)');
+    
+    // Add a simple root endpoint for API-only mode
+    app.get('/', (req, res) => {
+      res.json({
+        message: 'Elevate360 LMS API Server',
+        status: 'running',
+        version: '2.0.0',
+        endpoints: {
+          health: '/api/health',
+          auth: '/api/auth/*',
+          courses: '/api/courses/*',
+          users: '/api/users/*'
+        },
+        note: 'This is an API-only deployment. Frontend is served from Render Static Site.'
       });
-    }
+    });
 
     // Use `PORT` provided in environment or default to 5000
     const port = Number(process.env.PORT) || 5000;
