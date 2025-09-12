@@ -1,4 +1,4 @@
-import { useMockAuth } from "@/hooks/useMockAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,7 +10,7 @@ import { User, GraduationCap, Shield, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export function RoleSwitcher() {
-  const { user, switchUser } = useMockAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
 
   const getRoleIcon = (role: string) => {
@@ -40,11 +40,10 @@ export function RoleSwitcher() {
   };
 
   const handleRoleSwitch = (role: string) => {
-    console.log('Switching to role:', role);
-    switchUser(role);
+    console.log('Role switching not available in real auth mode');
     toast({
-      title: "Role switched",
-      description: `Now viewing as ${role}`,
+      title: "Role switching",
+      description: `Role switching is not available in production mode. Current role: ${user?.role}`,
     });
   };
 

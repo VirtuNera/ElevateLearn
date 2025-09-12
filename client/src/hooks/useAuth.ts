@@ -33,10 +33,27 @@ export function useAuth() {
     },
   });
 
+  const logout = async () => {
+    try {
+      const fullUrl = `${import.meta.env.PROD ? 'https://elevatelearn.onrender.com' : ''}/api/auth/logout`;
+      await fetch(fullUrl, {
+        method: 'POST',
+        credentials: "include",
+      });
+      // Clear the query cache to force re-fetch
+      window.location.reload();
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force reload anyway
+      window.location.reload();
+    }
+  };
+
   return {
     user,
     isLoading,
     isAuthenticated: !!user,
     error,
+    logout,
   };
 }

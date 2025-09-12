@@ -1,4 +1,4 @@
-import { useMockAuth } from "@/hooks/useMockAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import LearnerDashboard from "@/components/learner-dashboard";
@@ -8,7 +8,7 @@ import Navigation from "@/components/navigation";
 
 export default function Dashboard() {
   const { toast } = useToast();
-  const { isAuthenticated, isLoading, user } = useMockAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   // Debug logging
   console.log('Dashboard rendered with user:', user);

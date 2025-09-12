@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMockAuth } from "@/hooks/useMockAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 import { RoleSwitcher } from "./role-switcher";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ interface NavigationProps {
 }
 
 export default function Navigation({ currentRole, onRoleChange }: NavigationProps) {
-  const { user, logout } = useMockAuth();
+  const { user, logout } = useAuth();
   const [, setLocation] = useLocation();
   const [unreadNotifications] = useState(3);
   const [unreadMessages] = useState(2);

@@ -4,7 +4,7 @@ import { useLocation, useParams } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMockAuth } from "@/hooks/useMockAuth";
+import { useAuth } from "@/hooks/useAuth";
 import Navigation from "@/components/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +25,7 @@ const editCourseFormSchema = insertCourseSchema.partial().extend({
 type EditCourseForm = z.infer<typeof editCourseFormSchema>;
 
 export default function EditCoursePage() {
-  const { isAuthenticated, isLoading: authLoading, user } = useMockAuth();
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const [, setLocation] = useLocation();
   const params = useParams();
   const courseId = params.id;

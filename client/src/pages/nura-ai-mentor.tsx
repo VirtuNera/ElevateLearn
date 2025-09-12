@@ -1,9 +1,9 @@
-import { useMockAuth } from "@/hooks/useMockAuth";
+import { useAuth } from "@/hooks/useAuth";
 import Navigation from "@/components/navigation";
 import MentorNuraAI from "@/components/mentor-nura-ai";
 
 export default function NuraAIMentorPage() {
-  const { isAuthenticated, isLoading, user } = useMockAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
     return (

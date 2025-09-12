@@ -1,6 +1,6 @@
 import { useRoute } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { useMockAuth } from "@/hooks/useMockAuth";
+import { useAuth } from "@/hooks/useAuth";
 import Navigation from "@/components/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -215,7 +215,7 @@ const createDummyCourseData = (courseId: string) => ({
 });
 
 export default function CoursePage() {
-  const { isAuthenticated, isLoading: authLoading, user } = useMockAuth();
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const [, params] = useRoute('/course/:id');
   const courseId = params?.id;
 
