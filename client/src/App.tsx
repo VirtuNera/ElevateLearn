@@ -20,11 +20,9 @@ function AppRouter() {
 
   return (
     <Switch>
-      {isLoading || !isAuthenticated ? (
-        <Route path="/" component={Landing} />
-      ) : (
+      <Route path="/" component={isAuthenticated ? Dashboard : Landing} />
+      {isAuthenticated && (
         <>
-          <Route path="/" component={Dashboard} />
           <Route path="/nura-ai/learner" component={NuraAILearnerPage} />
           <Route path="/nura-ai/mentor" component={NuraAIMentorPage} />
           <Route path="/nura-ai/admin" component={NuraAIAdminPage} />

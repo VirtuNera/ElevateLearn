@@ -50,14 +50,8 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading time
-    const timer = setTimeout(() => {
-      // Default to learner role for demo
-      const defaultUser = DEMO_USERS.find(user => user.role === "learner") || DEMO_USERS[0];
-      setCurrentUser(defaultUser);
-      setIsLoading(false);
-    }, 500);
-
+    // Initial load: do not auto-authenticate. Keep unauthenticated until real/demo login occurs.
+    const timer = setTimeout(() => setIsLoading(false), 300);
     return () => clearTimeout(timer);
   }, []);
 
