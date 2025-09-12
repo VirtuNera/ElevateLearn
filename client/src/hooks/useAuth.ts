@@ -8,7 +8,7 @@ export function useAuth() {
     queryFn: async ({ queryKey }) => {
       try {
         const url = queryKey.join("/") as string;
-        const fullUrl = url.startsWith('http') ? url : `${import.meta.env.PROD ? 'https://elevatelearn-production.up.railway.app' : ''}${url}`;
+        const fullUrl = url.startsWith('http') ? url : `${import.meta.env.PROD ? 'https://elevatelearn.onrender.com' : ''}${url}`;
         
         console.log('Auth check URL:', fullUrl);
         

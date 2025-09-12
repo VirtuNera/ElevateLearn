@@ -16,7 +16,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Simple health check endpoint for Railway
+// Simple health check endpoint for Render
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'healthy', 

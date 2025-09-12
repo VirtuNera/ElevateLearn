@@ -24,7 +24,7 @@ const API_BASE_URL = getApiBaseUrl();
 console.log('API Base URL:', API_BASE_URL);
 console.log('Environment:', import.meta.env.MODE);
 console.log('API URL from env:', import.meta.env.VITE_API_URL);
-console.log('Railway URL from env:', import.meta.env.VITE_RAILWAY_URL);
+console.log('Render URL from env:', import.meta.env.VITE_API_URL);
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
