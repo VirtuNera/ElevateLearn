@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useMockAuth } from "@/hooks/useMockAuth";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
@@ -29,6 +30,8 @@ type TabType = 'learning-hub' | 'active-courses' | 'completed' | 'credentials';
 
 export default function LearnerDashboard() {
   const [, setLocation] = useLocation();
+  const { user } = useMockAuth();
+  const userId = (user as any)?.id;
   const [activeTab, setActiveTab] = useState<TabType>('learning-hub');
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -49,11 +52,13 @@ export default function LearnerDashboard() {
   });
 
   const { data: enrollments = [], isLoading: enrollmentsLoading } = useQuery({
-    queryKey: ['/api/enrollments'],
+    queryKey: ['/api/users', userId, 'enrollments'],
+    enabled: !!userId,
   });
 
   const { data: certifications = [], isLoading: certificationsLoading } = useQuery({
-    queryKey: ['/api/certifications'],
+    queryKey: ['/api/users', userId, 'certifications'],
+    enabled: !!userId,
   });
 
   const activeCourses = enrollments.filter((e: any) => e.status === 'active');
