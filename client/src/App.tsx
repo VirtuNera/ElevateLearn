@@ -39,8 +39,8 @@ function AppRouter() {
 }
 
 function App() {
-  // Get the base path for GitHub Pages
-  const basePath = import.meta.env.PROD ? '/ElevateLearn' : '';
+  // Use root base path for Render/GitHub Pages (assets served from '/')
+  const basePath = '';
   
   return (
     <MockAuthProvider>
