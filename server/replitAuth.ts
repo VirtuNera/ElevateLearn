@@ -19,7 +19,9 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // Allow HTTP for demo
+      // Render uses HTTPS; enable cross-site cookie for frontend on a different origin
+      secure: true,
+      sameSite: 'none' as any,
       maxAge: sessionTtl,
     },
   });
