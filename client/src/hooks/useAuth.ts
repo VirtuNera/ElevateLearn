@@ -1,6 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 export function useAuth() {
+  const queryClient = useQueryClient();
+  const [currentRole, setCurrentRole] = useState<string | null>(null);
+  
   const { data: user, isLoading, error } = useQuery({
     queryKey: ["/api/auth/user"],
     retry: false,
@@ -49,11 +53,34 @@ export function useAuth() {
     }
   };
 
+  // Role switching functionality for demo purposes
+  const switchRole = (role: string) => {
+    if (!user) return;
+    
+    // Create a modified user object with the new role
+    const modifiedUser = {
+      ...user,
+      role: role
+    };
+    
+    // Update the current role state
+    setCurrentRole(role);
+    
+    // Update the query cache with the modified user
+    queryClient.setQueryData(["/api/auth/user"], modifiedUser);
+    
+    console.log(`Switched to ${role} role`);
+  };
+
+  // Use the current role if set, otherwise use the user's role
+  const effectiveUser = currentRole && user ? { ...user, role: currentRole } : user;
+
   return {
-    user,
+    user: effectiveUser,
     isLoading,
     isAuthenticated: !!user,
     error,
     logout,
+    switchRole,
   };
 }

@@ -5,6 +5,7 @@ import { storage } from "./storage";
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
+  const isProduction = process.env.NODE_ENV === 'production';
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
@@ -19,9 +20,9 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      // Render uses HTTPS; enable cross-site cookie for frontend on a different origin
-      secure: true,
-      sameSite: 'none' as any,
+      // In production (Render/Railway) we need cross-site cookies; in dev we allow http
+      secure: isProduction,
+      sameSite: (isProduction ? 'none' : 'lax') as any,
       maxAge: sessionTtl,
     },
   });
@@ -355,14 +356,15 @@ export async function setupAuth(app: Express) {
       return res.status(400).json({ message: "Invalid demo user" });
     }
 
-    // Create or update the demo user in database and seed data
     try {
-      await storage.upsertUser(demoUser);
+      // Only try to use storage if database is available
+      if (process.env.DATABASE_URL && storage) {
+        await storage.upsertUser(demoUser);
+        // Seed demo data if not already present
+        await seedDemoData();
+      }
       
-      // Seed demo data if not already present
-      await seedDemoData();
-      
-      // Set session
+      // Set session (works without database)
       (req.session as any).userId = demoUser.id;
       (req.session as any).user = demoUser;
       

@@ -10,7 +10,7 @@ import { User, GraduationCap, Shield, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export function RoleSwitcher() {
-  const { user } = useAuth();
+  const { user, switchRole } = useAuth();
   const { toast } = useToast();
 
   const getRoleIcon = (role: string) => {
@@ -40,10 +40,11 @@ export function RoleSwitcher() {
   };
 
   const handleRoleSwitch = (role: string) => {
-    console.log('Role switching not available in real auth mode');
+    console.log('Switching to role:', role);
+    switchRole(role);
     toast({
-      title: "Role switching",
-      description: `Role switching is not available in production mode. Current role: ${user?.role}`,
+      title: "Role switched",
+      description: `Now viewing as ${role}`,
     });
   };
 

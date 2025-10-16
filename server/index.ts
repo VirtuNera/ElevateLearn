@@ -108,6 +108,12 @@ app.use((req, res, next) => {
       app.get('/api/test', (req, res) => {
         res.json({ message: 'Server is running but database not configured' });
       });
+      
+      // Add demo login routes for local development
+      const { setupAuth } = await import("./replitAuth");
+      await setupAuth(app);
+      console.log('Demo login routes registered for local development');
+      
       // Create a simple server for limited mode
       server = app;
     }
